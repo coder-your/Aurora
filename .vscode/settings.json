@@ -1,0 +1,26 @@
+{
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "CockroachDB",
+            "name": "aurora_db",
+            "database": "aurora_db",
+            "username": "postgres",
+            "password": "1234"
+        },
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "aurora_db",
+            "database": "aurora_db",
+            "username": "postgres",
+            "password": "1234"
+        }
+    ]
+}
