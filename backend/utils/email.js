@@ -78,3 +78,27 @@ export const sendResetEmail = async (email, token) => {
 
   await transporter.sendMail(mailOptions);
 };
+export const sendVerificationEmail = async (email, name, token) => {
+  const verifyLink = `http://localhost:3000/verify/${token}`;
+
+  const mailOptions = {
+    from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Verify your Aurora ✦ account",
+    html: `
+      <div style="${auroraStyles}">
+        <h2 style="font-size: 26px;">Welcome to Aurora ✦</h2>
+        <p style="color:#e3b8ff;">"where stories paint the sky"</p>
+        <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+        <p>Hi <b>${name}</b>,</p>
+        <p>Click below to verify your Aurora account and begin exploring your story!</p>
+        <a href="${verifyLink}" style="${buttonStyle}">Verify Account</a>
+        <p style="margin-top: 25px; color: #b8b8d9;">If you didn’t sign up, ignore this email.</p>
+        <br/>
+        <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
