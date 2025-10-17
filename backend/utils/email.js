@@ -10,7 +10,7 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-// --- Aurora ✦ Shared Styles ---
+
 const auroraStyles = `
   font-family: 'Poppins', sans-serif;
   background-color: #1c1d4f;
@@ -102,3 +102,28 @@ export const sendVerificationEmail = async (email, name, token) => {
 
   await transporter.sendMail(mailOptions);
 };
+
+export const send2FAEmail = async (email, name, otp) => {
+  const mailOptions = {
+    from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Aurora ✦ Your Login OTP",
+    html: `
+      <div style="${auroraStyles}">
+        <h2 style="font-size: 26px;">Login Verification ✦</h2>
+        <p style="color:#e3b8ff;">"Aurora ✦ where stories paint the sky"</p>
+        <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+        <p>Hi <b>${name}</b>,</p>
+        <p>Use the following OTP to complete your login:</p>
+        <h1 style="font-size: 36px; margin: 20px 0;">${otp}</h1>
+        <p>This code will expire in 5 minutes.</p>
+        <p style="margin-top: 25px; color: #b8b8d9;">If you didn’t try to login, please ignore this email.</p>
+        <br/>
+        <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
