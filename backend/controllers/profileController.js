@@ -3,6 +3,7 @@ import Profile from "../models/profile.js";
 import cloudinary from "../utils/cloudinary.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
+import { sendGoodbyeEmail } from "../utils/email.js";
 
 // Cloudinary + Multer setup
 const storage = new CloudinaryStorage({
@@ -27,6 +28,14 @@ export const createProfile = async (req, res) => {
         .json({ message: "Profile already exists for this user." });
     }
 
+    //  NEW: handle_name uniqueness check
+    if (req.body.handle_name) {
+      const existingHandle = await Profile.findByHandleName(req.body.handle_name);
+      if (existingHandle) {
+        return res.status(400).json({ message: "Handle name already taken." });
+      }
+    }
+
     let imageUrl = null;
     if (req.file && req.file.path) imageUrl = req.file.path;
 
@@ -42,6 +51,7 @@ export const createProfile = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 // GET own profile
 export const getMyProfile = async (req, res) => {
@@ -76,6 +86,14 @@ export const updateProfile = async (req, res) => {
     const profile = await Profile.findByUserId(user_id);
     if (!profile) return res.status(404).json({ message: "Profile not found." });
 
+    //  NEW: prevent duplicate handle_name
+    if (req.body.handle_name && req.body.handle_name !== profile.handle_name) {
+      const existingHandle = await Profile.findByHandleName(req.body.handle_name);
+      if (existingHandle) {
+        return res.status(400).json({ message: "Handle name already taken." });
+      }
+    }
+
     let imageUrl = profile.profile_image;
     if (req.file && req.file.path) imageUrl = req.file.path;
 
@@ -91,15 +109,24 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// DELETE profile
+
 export const deleteProfile = async (req, res) => {
   try {
     const user_id = req.user.user_id;
     const profile = await Profile.findByUserId(user_id);
     if (!profile) return res.status(404).json({ message: "Profile not found." });
 
+    // Delete profile from DB
     await Profile.remove(profile.profile_id);
-    res.json({ message: "Profile deleted successfully." });
+
+    //  farewell email
+    try {
+      await sendGoodbyeEmail(req.user.email, profile.first_name || "Aurora Friend");
+    } catch (emailError) {
+      console.error("Failed to send goodbye email:", emailError);
+    }
+
+    res.json({ message: "Profile deleted successfully. Goodbye email sent if possible." });
   } catch (error) {
     console.error("Error deleting profile:", error);
     res.status(500).json({ message: "Internal server error." });

@@ -65,7 +65,15 @@ export const verifyAccount = async (req, res) => {
     if (!user) return res.status(400).json({ error: "Invalid or expired verification token." });
 
     await verifyUser(token);
-    res.json({ message: "Account verified successfully!" });
+
+    // Send welcome email after successful verification
+    try {
+      await sendWelcomeEmail(user.email, user.first_name);
+    } catch (emailError) {
+      console.error("Failed to send welcome email:", emailError);
+    }
+
+    res.json({ message: "Account verified successfully! Welcome email sent if possible." });
   } catch (error) {
     res.status(500).json({ error: "Verification failed", details: error.message });
   }

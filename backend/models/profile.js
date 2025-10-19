@@ -49,6 +49,15 @@ const Profile = {
     return rows[0] || null;
   },
 
+  async findByHandleName(handle_name) {
+  const { rows } = await pool.query(
+    `SELECT * FROM user_profiles WHERE handle_name = $1;`,
+    [handle_name]
+  );
+  return rows[0] || null;
+},
+
+
   async findByUserId(user_id) {
     const { rows } = await pool.query(
       `SELECT * FROM user_profiles WHERE user_id = $1;`,

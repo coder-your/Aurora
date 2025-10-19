@@ -11,6 +11,8 @@ export const transporter = nodemailer.createTransport({
 });
 
 
+
+
 const auroraStyles = `
   font-family: 'Poppins', sans-serif;
   background-color: #1c1d4f;
@@ -121,6 +123,32 @@ export const send2FAEmail = async (email, name, otp) => {
         <br/>
         <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
       </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
+// --- Send Aurora ✦ Goodbye Email ---
+export const sendGoodbyeEmail = async (email, name) => {
+  const mailOptions = {
+    from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Aurora ✦ You’ll Be Missed Under Our Sky",
+    html: `
+    <div style="${auroraStyles}">
+      <h1 style="font-size: 32px; margin-bottom: 10px;">Aurora ✦</h1>
+      <p style="font-style: italic; color: #e3b8ff;">"where stories paint the sky"</p>
+      <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+      <p style="font-size: 18px;">Dear <b>${name}</b>,</p>
+      <p>We’re genuinely sorry to see you go. Your stories, your presence — they lit up our sky ✦</p>
+      <p>Every reader and writer leaves a mark, and yours will always shimmer here.  
+      Whether this is goodbye or just see-you-later, you’ll always have a home at Aurora.</p>
+      <a href="http://localhost:3000" style="${buttonStyle}">Return Anytime</a>
+      <br/><br/>
+      <p style="color: #b8b8d9; font-size: 14px;">— With warmth, The Aurora Team ✦</p>
+    </div>
     `,
   };
 
