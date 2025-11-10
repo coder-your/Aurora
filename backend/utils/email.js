@@ -10,9 +10,6 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-
-
-
 const auroraStyles = `
   font-family: 'Poppins', sans-serif;
   background-color: #1c1d4f;
@@ -47,7 +44,7 @@ export const sendWelcomeEmail = async (email, name) => {
       <p style="font-size: 18px;">Hi <b>${name}</b>,</p>
       <p>We’re thrilled to have you join <b>Aurora</b> — a world where readers and writers create magic together.</p>
       <p>Start exploring stories, share your imagination, and let your words light up the sky 🌌</p>
-      <a href="http://localhost:3000" style="${buttonStyle}">Visit Aurora</a>
+      <a href="https://aurora-frontend-tau.vercel.app" style="${buttonStyle}">Visit Aurora</a>
       <br/><br/>
       <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
     </div>
@@ -59,7 +56,7 @@ export const sendWelcomeEmail = async (email, name) => {
 
 // --- Send Aurora ✦ Password Reset Email ---
 export const sendResetEmail = async (email, token) => {
-  const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+  const resetLink = `https://aurora-frontend-tau.vercel.app/reset-password?token=${token}&email=${email}`;
   const mailOptions = {
     from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -80,8 +77,9 @@ export const sendResetEmail = async (email, token) => {
 
   await transporter.sendMail(mailOptions);
 };
+// --- Send Aurora ✦ Verification Email ---
 export const sendVerificationEmail = async (email, name, token) => {
-  const verifyLink = `http://localhost:3000/verify/${token}`;
+  const verifyLink = `https://aurora-frontend-tau.vercel.app/verify/${token}`;
 
   const mailOptions = {
     from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
@@ -105,6 +103,7 @@ export const sendVerificationEmail = async (email, name, token) => {
   await transporter.sendMail(mailOptions);
 };
 
+// --- Send Aurora ✦ 2FA Email ---
 export const send2FAEmail = async (email, name, otp) => {
   const mailOptions = {
     from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
@@ -129,7 +128,6 @@ export const send2FAEmail = async (email, name, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
-
 // --- Send Aurora ✦ Goodbye Email ---
 export const sendGoodbyeEmail = async (email, name) => {
   const mailOptions = {
@@ -145,7 +143,7 @@ export const sendGoodbyeEmail = async (email, name) => {
       <p>We’re genuinely sorry to see you go. Your stories, your presence — they lit up our sky ✦</p>
       <p>Every reader and writer leaves a mark, and yours will always shimmer here.  
       Whether this is goodbye or just see-you-later, you’ll always have a home at Aurora.</p>
-      <a href="http://localhost:3000" style="${buttonStyle}">Return Anytime</a>
+      <a href="https://aurora-frontend-tau.vercel.app" style="${buttonStyle}">Return Anytime</a>
       <br/><br/>
       <p style="color: #b8b8d9; font-size: 14px;">— With warmth, The Aurora Team ✦</p>
     </div>
@@ -154,4 +152,3 @@ export const sendGoodbyeEmail = async (email, name) => {
 
   await transporter.sendMail(mailOptions);
 };
-

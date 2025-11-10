@@ -23,6 +23,11 @@ app.use(express.json());
 // Test route
 app.get("/", (req, res) => res.send("Aurora API running ✦"));
 
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Frontend connected successfully ✅" });
+});
+
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
