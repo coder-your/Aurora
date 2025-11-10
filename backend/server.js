@@ -12,7 +12,7 @@ const app = express();
 
 // CORS setup
 app.use(cors({
-  origin: "*", // Change to your frontend URL in production
+  origin: "https://aurora-frontend-tau.vercel.app", // frontend URL
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
