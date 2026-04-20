@@ -37,17 +37,40 @@ export const sendWelcomeEmail = async (email, name) => {
     to: email,
     subject: "Welcome to Aurora ✦ Where Stories Paint the Sky",
     html: `
-    <div style="${auroraStyles}">
-      <h1 style="font-size: 32px; margin-bottom: 10px;">Aurora ✦</h1>
-      <p style="font-style: italic; color: #e3b8ff;">"where stories paint the sky"</p>
-      <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
-      <p style="font-size: 18px;">Hi <b>${name}</b>,</p>
-      <p>We’re thrilled to have you join <b>Aurora</b> — a world where readers and writers create magic together.</p>
-      <p>Start exploring stories, share your imagination, and let your words light up the sky 🌌</p>
-      <a href="https://aurora-frontend-tau.vercel.app" style="${buttonStyle}">Visit Aurora</a>
-      <br/><br/>
-      <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
-    </div>
+      <div style="${auroraStyles}">
+        <h1 style="font-size: 32px; margin-bottom: 10px;">Aurora ✦</h1>
+        <p style="font-style: italic; color: #e3b8ff;">"where stories paint the sky"</p>
+        <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+        <p style="font-size: 18px;">Hi <b>${name}</b>,</p>
+        <p>We’re thrilled to have you join <b>Aurora</b> — a world where readers and writers create magic together.</p>
+        <p>Start exploring stories, share your imagination, and let your words light up the sky 🌌</p>
+        <a href="http://localhost:5175" style="${buttonStyle}">Visit Aurora</a>
+        <br/><br/>
+        <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// --- Send Aurora ✦ Subscription Email ---
+export const sendSubscriptionEmail = async (email) => {
+  const mailOptions = {
+    from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Aurora ✦ Thanks for subscribing",
+    html: `
+      <div style="${auroraStyles}">
+        <h2 style="font-size: 26px;">Thank you for subscribing ✦</h2>
+        <p style="color:#e3b8ff;">"where stories paint the sky"</p>
+        <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+        <p>You're now subscribed to Aurora updates.</p>
+        <p>We'll let you know about new published books, fresh recommendations, and platform updates.</p>
+        <a href="http://localhost:5173" style="${buttonStyle}">Visit Aurora</a>
+        <br/><br/>
+        <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
+      </div>
     `,
   };
 
@@ -56,31 +79,31 @@ export const sendWelcomeEmail = async (email, name) => {
 
 // --- Send Aurora ✦ Password Reset Email ---
 export const sendResetEmail = async (email, token) => {
-  const resetLink = `https://aurora-frontend-tau.vercel.app/reset-password?token=${token}&email=${email}`;
+  const resetLink = `http://localhost:5175/reset-password?token=${token}&email=${email}`;
   const mailOptions = {
     from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Aurora ✦ Reset Your Password",
     html: `
-    <div style="${auroraStyles}">
-      <h2 style="font-size: 26px;">Reset Your Password ✦</h2>
-      <p style="color:#e3b8ff;">"Aurora ✦ where stories paint the sky"</p>
-      <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
-      <p>We received a request to reset your Aurora account password.</p>
-      <a href="${resetLink}" style="${buttonStyle}">Reset Password</a>
-      <p style="margin-top: 25px; color: #b8b8d9;">If you didn’t request this, just ignore this email.</p>
-      <br/>
-      <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
-    </div>
+      <div style="${auroraStyles}">
+        <h2 style="font-size: 26px;">Reset Your Password ✦</h2>
+        <p style="color:#e3b8ff;">"Aurora ✦ where stories paint the sky"</p>
+        <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+        <p>We received a request to reset your Aurora account password.</p>
+        <a href="${resetLink}" style="${buttonStyle}">Reset Password</a>
+        <p style="margin-top: 25px; color: #b8b8d9;">If you didn’t request this, just ignore this email.</p>
+        <br/>
+        <p style="color: #b8b8d9; font-size: 14px;">— The Aurora Team ✦</p>
+      </div>
     `,
   };
 
   await transporter.sendMail(mailOptions);
 };
+
 // --- Send Aurora ✦ Verification Email ---
 export const sendVerificationEmail = async (email, name, token) => {
-  const verifyLink = `https://aurora-frontend-tau.vercel.app/verify/${token}`;
-
+  const verifyLink = `http://localhost:5175/verify/${token}`;
   const mailOptions = {
     from: `"Aurora ✦ Team" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -135,18 +158,18 @@ export const sendGoodbyeEmail = async (email, name) => {
     to: email,
     subject: "Aurora ✦ You’ll Be Missed Under Our Sky",
     html: `
-    <div style="${auroraStyles}">
-      <h1 style="font-size: 32px; margin-bottom: 10px;">Aurora ✦</h1>
-      <p style="font-style: italic; color: #e3b8ff;">"where stories paint the sky"</p>
-      <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
-      <p style="font-size: 18px;">Dear <b>${name}</b>,</p>
-      <p>We’re genuinely sorry to see you go. Your stories, your presence — they lit up our sky ✦</p>
-      <p>Every reader and writer leaves a mark, and yours will always shimmer here.  
-      Whether this is goodbye or just see-you-later, you’ll always have a home at Aurora.</p>
-      <a href="https://aurora-frontend-tau.vercel.app" style="${buttonStyle}">Return Anytime</a>
-      <br/><br/>
-      <p style="color: #b8b8d9; font-size: 14px;">— With warmth, The Aurora Team ✦</p>
-    </div>
+      <div style="${auroraStyles}">
+        <h1 style="font-size: 32px; margin-bottom: 10px;">Aurora ✦</h1>
+        <p style="font-style: italic; color: #e3b8ff;">"where stories paint the sky"</p>
+        <hr style="border: none; border-top: 1px solid #5e5aa1; margin: 25px 0; width: 70%;" />
+        <p style="font-size: 18px;">Dear <b>${name}</b>,</p>
+        <p>We’re genuinely sorry to see you go. Your stories, your presence — they lit up our sky ✦</p>
+        <p>Every reader and writer leaves a mark, and yours will always shimmer here.  
+        Whether this is goodbye or just see-you-later, you’ll always have a home at Aurora.</p>
+        <a href="http://localhost:5175" style="${buttonStyle}">Return Anytime</a>
+        <br/><br/>
+        <p style="color: #b8b8d9; font-size: 14px;">— With warmth, The Aurora Team ✦</p>
+      </div>
     `,
   };
 
