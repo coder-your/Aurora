@@ -1,6 +1,7 @@
 import prisma from "../utils/prisma.js";
 import { sanitizeInput } from "../utils/sanitize.js";
 import { analyzeToxicity } from "../utils/toxicity.js";
+import { tryAward, ACTIVITY_TYPES } from "../utils/auroraHooks.js";
 
 const REPORT_HIDE_THRESHOLD = 5;
 
@@ -255,6 +256,11 @@ export const likeStory = async (req, res) => {
       create: { user_id: user.user_id, story_id: storyId },
     });
 
+    tryAward(user.user_id, ACTIVITY_TYPES.STORY_LIKE, {
+      referenceType: "story",
+      referenceId: storyId,
+    });
+
     const count = await prisma.story_likes.count({ where: { story_id: storyId } });
     return res.status(201).json({ liked: true, count });
   } catch (err) {
@@ -300,6 +306,11 @@ export const likeChapter = async (req, res) => {
       where: { user_id_chapter_id: { user_id: user.user_id, chapter_id: chapterId } },
       update: {},
       create: { user_id: user.user_id, chapter_id: chapterId },
+    });
+
+    tryAward(user.user_id, ACTIVITY_TYPES.CHAPTER_LIKE, {
+      referenceType: "chapter",
+      referenceId: chapterId,
     });
 
     const count = await prisma.chapter_likes.count({ where: { chapter_id: chapterId } });
@@ -615,6 +626,12 @@ export const createStoryComment = async (req, res) => {
       if (!isSchemaOrTableMissing(e)) throw e;
     }
 
+    // Award points only once per story per user (idempotent via engagement_point_logs unique constraint)
+    tryAward(user.user_id, ACTIVITY_TYPES.COMMENT, {
+      referenceType: "story",
+      referenceId: storyId,
+    });
+
     return res.status(201).json(created);
   } catch (err) {
     console.error("createStoryComment error:", err);
@@ -703,6 +720,11 @@ export const createChapterComment = async (req, res) => {
     } catch (e) {
       if (!isSchemaOrTableMissing(e)) throw e;
     }
+
+    tryAward(user.user_id, ACTIVITY_TYPES.COMMENT, {
+      referenceType: "comment",
+      referenceId: created.comment_id,
+    });
 
     return res.status(201).json(created);
   } catch (err) {
@@ -1033,6 +1055,10 @@ export const upsertStoryReview = async (req, res) => {
     const review_text_raw = (req.body?.review_text || "").toString();
     const review_text = review_text_raw ? sanitizeInput(review_text_raw) : null;
 
+    const hadReview = await prisma.story_reviews.findUnique({
+      where: { story_id_user_id: { story_id: storyId, user_id: user.user_id } },
+    });
+
     const saved = await prisma.story_reviews.upsert({
       where: { story_id_user_id: { story_id: storyId, user_id: user.user_id } },
       update: { rating, review_text, updated_at: new Date() },
@@ -1058,6 +1084,13 @@ export const upsertStoryReview = async (req, res) => {
       });
     }
 
+    if (!hadReview) {
+      tryAward(user.user_id, ACTIVITY_TYPES.REVIEW, {
+        referenceType: "story",
+        referenceId: storyId,
+      });
+    }
+
     return res.status(201).json(saved);
   } catch (err) {
     console.error("upsertStoryReview error:", err);
@@ -1075,13 +1108,20 @@ export const shareStory = async (req, res) => {
 
     const platform = (req.body?.platform || "copy_link").toString().trim().toLowerCase();
 
-    await prisma.story_shares.create({
+    const share = await prisma.story_shares.create({
       data: {
         story_id: storyId,
         user_id: req.user?.user_id || null,
         platform,
       },
     });
+
+    if (req.user?.user_id) {
+      tryAward(req.user.user_id, ACTIVITY_TYPES.SHARE_BOOK, {
+        referenceType: "share",
+        referenceId: share.id,
+      });
+    }
 
     const count = await prisma.story_shares.count({ where: { story_id: storyId } });
     return res.status(201).json({ shared: true, count });
@@ -1101,13 +1141,20 @@ export const shareChapter = async (req, res) => {
 
     const platform = (req.body?.platform || "copy_link").toString().trim().toLowerCase();
 
-    await prisma.chapter_shares.create({
+    const share = await prisma.chapter_shares.create({
       data: {
         chapter_id: chapterId,
         user_id: req.user?.user_id || null,
         platform,
       },
     });
+
+    if (req.user?.user_id) {
+      tryAward(req.user.user_id, ACTIVITY_TYPES.SHARE_CHAPTER, {
+        referenceType: "share",
+        referenceId: share.id,
+      });
+    }
 
     const count = await prisma.chapter_shares.count({ where: { chapter_id: chapterId } });
     return res.status(201).json({ shared: true, count });

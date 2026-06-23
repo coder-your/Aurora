@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+import { tryAward, ACTIVITY_TYPES } from "../utils/auroraHooks.js";
 
 const canReadStory = (story, userId) => {
   if (!story || story.is_deleted) return false;
@@ -254,6 +255,19 @@ export const updateProgress = async (req, res) => {
       },
     });
 
+    if (typeof chapterPercent === "number" && chapterPercent >= 90) {
+      tryAward(userId, ACTIVITY_TYPES.CHAPTER_READ, {
+        referenceType: "chapter",
+        referenceId: chapter_id,
+      });
+    }
+    if (newProgress >= 100) {
+      tryAward(userId, ACTIVITY_TYPES.BOOK_COMPLETE, {
+        referenceType: "story",
+        referenceId: story_id,
+      });
+    }
+
     return res.json({ success: true });
   } catch (err) {
     console.error("updateProgress error:", err);
@@ -281,6 +295,11 @@ export const addBookmark = async (req, res) => {
         position: position ?? 0,
         note: note || null,
       },
+    });
+
+    tryAward(userId, ACTIVITY_TYPES.BOOKMARK, {
+      referenceType: "bookmark",
+      referenceId: bookmark.id,
     });
 
     return res.status(201).json(bookmark);

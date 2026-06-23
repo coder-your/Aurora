@@ -38,13 +38,14 @@ export const overview = async (req, res) => {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     const prevSince = new Date(Date.now() - days * 2 * 24 * 60 * 60 * 1000);
 
-    const [stories, followersTotal, followersLastNDays] = await Promise.all([
+    const [stories, followersTotal, followersLastNDays, writerProfile] = await Promise.all([
       prisma.stories.findMany({
         where: { author_id: writerId, is_deleted: false },
         select: { story_id: true, status: true, visibility: true },
       }),
       prisma.writer_follows.count({ where: { writer_id: writerId } }),
       prisma.writer_follows.count({ where: { writer_id: writerId, created_at: { gte: since } } }),
+      prisma.user_profiles.findUnique({ where: { user_id: writerId }, select: { handle_name: true, nickname: true } }).catch(() => null),
     ]);
 
     const storyIds = stories.map((s) => s.story_id);
@@ -205,6 +206,8 @@ export const overview = async (req, res) => {
 
     return res.json({
       range_days: days,
+      display_name: writerProfile?.handle_name || writerProfile?.nickname || null,
+      writer_name: writerProfile?.nickname || writerProfile?.handle_name || null,
       stories_total: stories.length,
       stories_published: publishedStories,
       followers_total: followersTotal,

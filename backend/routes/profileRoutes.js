@@ -84,6 +84,7 @@ router.post("/", uploadProfileImage, profileValidation, validateRequest, createP
 
 //  Get your own profile
 router.get("/me", getMyProfile);
+router.get("/", getMyProfile);
 
 //  Update profile
 router.put("/", uploadProfileImage, profileValidation, validateRequest, updateProfile);

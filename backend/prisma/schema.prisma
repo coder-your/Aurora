@@ -1,0 +1,962 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "./ERD/-erd.svg"
+}
+
+
+model users {
+  user_id                Int                 @id @default(autoincrement())
+  first_name             String?             @db.VarChar(50)
+  last_name              String?             @db.VarChar(50)
+  email                  String              @unique @db.VarChar(100)
+  password_hash          String              @db.VarChar(255)
+  is_writer              Boolean             @default(false)
+  is_reader              Boolean             @default(true)
+  reset_token            String?             @db.VarChar(255)
+  reset_token_expires    DateTime?           @db.Timestamp(6)
+  created_at             DateTime            @default(now()) @db.Timestamp(6)
+  updated_at             DateTime            @default(now()) @db.Timestamp(6)
+  is_verified            Boolean             @default(false)
+  verification_token     String?             @db.VarChar(255)
+  two_factor_code        String?             @db.VarChar(10)
+  two_factor_expires     DateTime?           @db.Timestamp(6)
+  bookmarks              bookmarks[]
+  chapter_versions       chapter_versions[]
+  chapters               chapters[]
+  moodboards             moodboards[]
+  notifications_sent     notifications[]     @relation("NotificationActor")
+  notifications_received notifications[]     @relation("NotificationRecipient")
+  reading_positions      reading_positions[]
+  reading_sessions       reading_sessions[]
+  stories                stories[]
+  to_be_reads            to_be_read[]
+  profile                user_profiles?
+  read_history           user_read_history[]
+  following_writers      writer_follows[]    @relation("Follower")
+  followers              writer_follows[]    @relation("Writer")
+
+  story_likes       story_likes[]
+  chapter_likes     chapter_likes[]
+  story_shares      story_shares[]
+  chapter_shares    chapter_shares[]
+  story_reviews     story_reviews[]
+  comments          comments[]
+  comment_reactions comment_reactions[]
+  comment_mentions  comment_mentions[]
+  comment_reports   comment_reports[]
+
+  writer_posts      writer_posts[]
+  chapter_author_notes chapter_author_notes[]
+  ai_assistant_history ai_assistant_history[]
+
+  reader_engagement       reader_engagement?
+  aurora_cards            aurora_cards[]
+  engagement_point_logs   engagement_point_logs[]
+  plot_twist_events       plot_twist_events[]       @relation("PlotTwistEventAuthor")
+  plot_twist_submissions  plot_twist_submissions[]
+  plot_twist_votes        plot_twist_votes[]
+  plot_twist_contributor  plot_twist_contributors?
+  
+  user_embedding          user_embeddings?
+  recommendation_interactions recommendation_interactions[]
+  recommendation_history  recommendation_history[]
+  recommendation_stats    recommendation_stats?
+}
+
+model user_profiles {
+  profile_id          Int      @id @default(autoincrement())
+  user_id             Int      @unique
+  first_name          String?  @db.VarChar(50)
+  last_name           String?  @db.VarChar(50)
+  handle_name         String?  @unique(map: "unique_handle") @db.VarChar(50)
+  nickname            String?  @db.VarChar(50)
+  pronouns            String?  @db.VarChar(30)
+  bio                 String?
+  gender              String?  @db.VarChar(20)
+  profile_image       String?
+  total_books_read    Int      @default(0)
+  total_books_written Int      @default(0)
+  role                String   @default("reader") @db.VarChar(20)
+  is_suspended        Boolean  @default(false)
+  created_at          DateTime @default(now()) @db.Timestamp(6)
+  updated_at          DateTime @default(now()) @db.Timestamp(6)
+  user                users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model stories {
+  story_id          Int                 @id @default(autoincrement())
+  author_id         Int
+  title             String?             @db.VarChar(255)
+  description       String?
+  category          String?             @db.VarChar(50)
+  tags              String?
+  cover_url         String?
+  visibility        String              @default("draft") @db.VarChar(20)
+  status            String              @default("in_progress") @db.VarChar(30)
+  is_mature         Boolean             @default(false)
+  has_copyright     Boolean             @default(false)
+  total_words       Int                 @default(0)
+  total_chapters    Int                 @default(0)
+  estimated_minutes Int                 @default(0)
+  last_updated      DateTime            @default(now()) @db.Timestamp(6)
+  is_deleted        Boolean             @default(false)
+  deleted_at        DateTime?           @db.Timestamp(6)
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  cover_public_id   String?
+  bookmarks         bookmarks[]
+  chapters          chapters[]
+  moodboards        moodboards[]
+  reading_positions reading_positions[]
+  reading_sessions  reading_sessions[]
+  author            users               @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  story_tags        story_tags[]
+  versions          story_versions[]
+  to_be_reads       to_be_read[]
+  read_history      user_read_history[]
+
+  story_likes   story_likes[]
+  comments      comments[]
+  story_reviews story_reviews[]
+  story_shares  story_shares[]
+
+  writer_posts      writer_posts[]
+  story_milestones  story_milestones[]
+  comment_settings  story_comment_settings?
+  comment_keyword_filters comment_keyword_filters[]
+  ai_assistant_history ai_assistant_history[]
+  plot_twist_events    plot_twist_events[]
+
+  ai_turns_used     Int                 @default(0)
+  ai_turns_limit    Int                 @default(5)
+  
+  story_analysis    story_analysis?
+  story_embeddings  story_embeddings?
+}
+
+model chapters {
+  chapter_id        Int                 @id @default(autoincrement())
+  story_id          Int
+  author_id         Int
+  title             String?             @db.VarChar(255)
+  content_raw       String?
+  content_html      String?
+  content_delta     String?
+  order_index       Int                 @default(0)
+  word_count        Int                 @default(0)
+  char_count        Int                 @default(0)
+  paragraphs        Int                 @default(0)
+  reading_minutes   Int                 @default(0)
+  is_deleted        Boolean             @default(false)
+  deleted_at        DateTime?           @db.Timestamp(6)
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  bookmarks         bookmarks[]
+  versions          chapter_versions[]
+  author            users               @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  story             stories             @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  reading_positions reading_positions[]
+
+  chapter_likes  chapter_likes[]
+  comments       comments[]
+  chapter_shares chapter_shares[]
+
+  author_notes chapter_author_notes[]
+  plot_twist_events      plot_twist_events[]
+  plot_twist_credits     plot_twist_chapter_credits[]
+}
+
+model chapter_versions {
+  version_id      Int      @id @default(autoincrement())
+  chapter_id      Int
+  author_id       Int
+  content_raw     String
+  content_html    String
+  content_delta   String?
+  word_count      Int
+  char_count      Int
+  paragraphs      Int
+  reading_minutes Int
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  signature       String   @db.VarChar(255)
+  author          users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  chapter         chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+}
+
+model story_versions {
+  id         Int      @id @default(autoincrement())
+  story_id   Int
+  snapshot   String
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+}
+
+model media {
+  media_id   Int      @id @default(autoincrement())
+  owner_id   Int?
+  url        String
+  mime_type  String?  @db.VarChar(100)
+  size_bytes Int?
+  source     String?  @db.VarChar(50)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model to_be_read {
+  id       Int      @id @default(autoincrement())
+  user_id  Int
+  story_id Int
+  added_at DateTime @default(now())
+  story    stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, story_id])
+}
+
+model user_read_history {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  story_id  Int
+  last_read DateTime @default(now())
+  progress  Int      @default(0)
+  story     stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user      users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, story_id])
+}
+
+model story_tags {
+  id       Int     @id @default(autoincrement())
+  story_id Int
+  tag      String  @db.VarChar(50)
+  story    stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+}
+
+model reading_positions {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  story_id   Int
+  chapter_id Int
+  position   Int      @default(0)
+  updated_at DateTime @default(now())
+  chapter    chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, story_id])
+}
+
+model bookmarks {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  story_id   Int
+  chapter_id Int
+  position   Int      @default(0)
+  note       String?
+  created_at DateTime @default(now())
+  chapter    chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model reading_sessions {
+  id       Int      @id @default(autoincrement())
+  user_id  Int
+  story_id Int
+  date     DateTime @default(now())
+  minutes  Int      @default(0)
+  story    stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user     users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id, date])
+}
+
+model moodboards {
+  moodboard_id  Int                         @id @default(autoincrement())
+  owner_id      Int
+  title         String                      @db.VarChar(255)
+  description   String?
+  data          String?
+  visibility    String                      @default("private") @db.VarChar(20)
+  is_deleted    Boolean                     @default(false)
+  created_at    DateTime                    @default(now()) @db.Timestamp(6)
+  updated_at    DateTime                    @default(now()) @db.Timestamp(6)
+  layout_state  String?
+  story_vibe    String?
+  story_id      Int?
+  relationships moodboard_character_links[]
+  characters    moodboard_characters[]
+  inspirations  moodboard_inspirations[]
+  notes         moodboard_notes[]
+  quotes        moodboard_quotes[]
+  timeline      moodboard_timeline_events[]
+  tracks        moodboard_tracks[]
+  vibe_panel    moodboard_vibe_panel?
+  locations     moodboard_world_locations[]
+  world_meta    moodboard_world_meta?
+  owner         users                       @relation(fields: [owner_id], references: [user_id], onDelete: Cascade)
+  story         stories?                    @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+
+  @@index([owner_id, visibility])
+  @@index([story_id])
+}
+
+model moodboard_vibe_panel {
+  id            Int        @id @default(autoincrement())
+  moodboard_id  Int        @unique
+  color_palette String?
+  images        String?
+  themes        String?
+  vibe_summary  String?
+  moodboard     moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+}
+
+model moodboard_characters {
+  id                  Int                         @id @default(autoincrement())
+  moodboard_id        Int
+  name                String                      @db.VarChar(100)
+  age                 String?                     @db.VarChar(50)
+  role                String?                     @db.VarChar(100)
+  image_url           String?
+  introvert_extrovert Int                         @default(50)
+  soft_fierce         Int                         @default(50)
+  chaotic_ordered     Int                         @default(50)
+  logical_emotional   Int                         @default(50)
+  backstory           String?
+  extra_gallery       String?
+  links_from          moodboard_character_links[] @relation("FromChar")
+  links_to            moodboard_character_links[] @relation("ToChar")
+  moodboard           moodboards                  @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model writer_follows {
+  id          Int      @id @default(autoincrement())
+  follower_id Int
+  writer_id   Int
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  follower    users    @relation("Follower", fields: [follower_id], references: [user_id], onDelete: Cascade)
+  writer      users    @relation("Writer", fields: [writer_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([follower_id, writer_id])
+  @@index([writer_id, created_at])
+  @@index([follower_id, created_at])
+}
+
+model notifications {
+  id           Int      @id @default(autoincrement())
+  recipient_id Int
+  actor_id     Int?
+  type         String   @db.VarChar(50)
+  entity_type  String?  @db.VarChar(50)
+  entity_id    Int?
+  data         String?
+  is_read      Boolean  @default(false)
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  actor        users?   @relation("NotificationActor", fields: [actor_id], references: [user_id])
+  recipient    users    @relation("NotificationRecipient", fields: [recipient_id], references: [user_id], onDelete: Cascade)
+
+  @@index([recipient_id, is_read, created_at])
+}
+
+model moodboard_world_locations {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int
+  name         String     @db.VarChar(255)
+  kind         String?    @db.VarChar(50)
+  image_url    String?
+  notes        String?
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model moodboard_world_meta {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int        @unique
+  magic_rules  String?
+  politics     String?
+  society      String?
+  culture_food String?
+  clothing     String?
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+}
+
+model moodboard_quotes {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int
+  kind         String?    @db.VarChar(30)
+  text         String
+  speaker      String?    @db.VarChar(100)
+  tone         String?    @db.VarChar(50)
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model moodboard_tracks {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int
+  kind         String     @db.VarChar(30)
+  label        String?    @db.VarChar(255)
+  spotify_id   String?    @db.VarChar(191)
+  spotify_url  String?
+  ambient_tag  String?    @db.VarChar(50)
+  scene_label  String?    @db.VarChar(255)
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model moodboard_inspirations {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int
+  type         String     @db.VarChar(30)
+  title        String?    @db.VarChar(255)
+  source       String?    @db.VarChar(100)
+  url          String?
+  content      String?
+  meta         String?
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model moodboard_notes {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int
+  kind         String     @db.VarChar(30)
+  title        String?    @db.VarChar(255)
+  content      String?
+  parent_id    Int?
+  pos_x        Int?
+  pos_y        Int?
+  color        String?    @db.VarChar(20)
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model moodboard_timeline_events {
+  id           Int        @id @default(autoincrement())
+  moodboard_id Int
+  label        String     @db.VarChar(255)
+  description  String?
+  act          Int?
+  position     Int        @default(0)
+  moodboard    moodboards @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model moodboard_character_links {
+  id           Int                  @id @default(autoincrement())
+  moodboard_id Int
+  from_id      Int
+  to_id        Int
+  label        String?              @db.VarChar(255)
+  intensity    Int?
+  from         moodboard_characters @relation("FromChar", fields: [from_id], references: [id], onDelete: Cascade)
+  moodboard    moodboards           @relation(fields: [moodboard_id], references: [moodboard_id], onDelete: Cascade)
+  to           moodboard_characters @relation("ToChar", fields: [to_id], references: [id], onDelete: Cascade)
+
+  @@index([moodboard_id])
+}
+
+model story_likes {
+  id         Int      @id @default(autoincrement())
+  story_id   Int
+  user_id    Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, story_id], name: "user_id_story_id")
+  @@index([story_id, created_at])
+}
+
+model chapter_likes {
+  id         Int      @id @default(autoincrement())
+  chapter_id Int
+  user_id    Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  chapter    chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, chapter_id], name: "user_id_chapter_id")
+  @@index([chapter_id, created_at])
+}
+
+model writer_posts {
+  id         Int      @id @default(autoincrement())
+  writer_id  Int
+  story_id   Int?
+  type       String   @default("post") @db.VarChar(30)
+  title      String?
+  body       String
+  is_deleted Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  writer users   @relation(fields: [writer_id], references: [user_id], onDelete: Cascade)
+  story  stories? @relation(fields: [story_id], references: [story_id], onDelete: SetNull)
+
+  @@index([writer_id, created_at])
+  @@index([story_id])
+}
+
+model chapter_author_notes {
+  id         Int      @id @default(autoincrement())
+  chapter_id Int
+  author_id  Int
+  placement  String   @db.VarChar(10) // before/after
+  body       String
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+
+  chapter chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  author  users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([chapter_id, placement], name: "chapter_id_placement")
+  @@index([author_id, updated_at])
+}
+
+model story_milestones {
+  id         Int      @id @default(autoincrement())
+  story_id   Int
+  metric     String   @db.VarChar(30)
+  threshold  Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+
+  @@unique([story_id, metric, threshold])
+  @@index([story_id, created_at])
+}
+
+model story_comment_settings {
+  id            Int      @id @default(autoincrement())
+  story_id       Int      @unique
+  comments_enabled Boolean @default(true)
+  is_muted       Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @default(now()) @db.Timestamp(6)
+
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+}
+
+model comment_keyword_filters {
+  id         Int      @id @default(autoincrement())
+  story_id   Int
+  keyword    String   @db.VarChar(100)
+  is_blocked Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+
+  @@unique([story_id, keyword])
+  @@index([story_id, created_at])
+}
+
+model comments {
+  comment_id Int       @id @default(autoincrement())
+  story_id   Int?
+  chapter_id Int?
+  user_id    Int
+  parent_id  Int?
+  body       String
+  is_pinned  Boolean   @default(false)
+  is_hidden  Boolean   @default(false)
+  is_deleted Boolean   @default(false)
+  deleted_at DateTime? @db.Timestamp(6)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime  @default(now()) @db.Timestamp(6)
+
+  story    stories?  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  chapter  chapters? @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  user     users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  parent   comments? @relation("CommentThread", fields: [parent_id], references: [comment_id], onDelete: Cascade)
+  replies  comments[] @relation("CommentThread")
+
+  reactions comment_reactions[]
+  mentions  comment_mentions[]
+  reports   comment_reports[]
+
+  @@index([story_id, created_at])
+  @@index([chapter_id, created_at])
+  @@index([parent_id])
+}
+
+model comment_reactions {
+  id         Int      @id @default(autoincrement())
+  comment_id Int
+  user_id    Int
+  reaction   String   @db.VarChar(20)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  comment comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
+  user    users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([comment_id, user_id, reaction], name: "comment_id_user_id_reaction")
+  @@index([comment_id, created_at])
+}
+
+model comment_mentions {
+  id                Int      @id @default(autoincrement())
+  comment_id        Int
+  mentioned_user_id Int
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+
+  comment        comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
+  mentioned_user users    @relation(fields: [mentioned_user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([comment_id, mentioned_user_id])
+  @@index([mentioned_user_id, created_at])
+}
+
+model comment_reports {
+  id         Int      @id @default(autoincrement())
+  comment_id Int
+  reporter_id Int
+  reason     String?  @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  comment  comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
+  reporter users    @relation(fields: [reporter_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([comment_id, reporter_id], name: "comment_id_reporter_id")
+  @@index([comment_id, created_at])
+}
+
+model story_reviews {
+  id          Int       @id @default(autoincrement())
+  story_id    Int
+  user_id     Int
+  rating      Int
+  review_text String?
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime  @default(now()) @db.Timestamp(6)
+
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user  users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([story_id, user_id], name: "story_id_user_id")
+  @@index([story_id, created_at])
+}
+
+model story_shares {
+  id         Int      @id @default(autoincrement())
+  story_id   Int
+  user_id    Int?
+  platform   String   @db.VarChar(30)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user  users?  @relation(fields: [user_id], references: [user_id], onDelete: SetNull)
+
+  @@index([story_id, created_at])
+}
+
+model chapter_shares {
+  id         Int      @id @default(autoincrement())
+  chapter_id Int
+  user_id    Int?
+  platform   String   @db.VarChar(30)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  chapter chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  user    users?   @relation(fields: [user_id], references: [user_id], onDelete: SetNull)
+
+  @@index([chapter_id, created_at])
+}
+
+model ai_assistant_history {
+  id         Int      @id @default(autoincrement())
+  story_id   Int
+  user_id    Int
+  capability String   @db.VarChar(50)
+  prompt     String   @db.Text
+  response   String   @db.Text
+  word_count Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user  users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([story_id])
+  @@index([user_id])
+  @@index([created_at])
+}
+
+// ─── Aurora Cards & Plot Twist ─────────────────────────────────────────────
+
+model reader_engagement {
+  user_id               Int      @id
+  total_points          Int      @default(0)
+  points_in_current_cycle Int    @default(0)
+  total_cards_earned    Int      @default(0)
+  daily_streak          Int      @default(0)
+  last_streak_date      DateTime? @db.Date
+  updated_at            DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  user                  users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model engagement_point_logs {
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  activity_type   String   @db.VarChar(50)
+  points          Int
+  reference_type  String?  @db.VarChar(30)
+  reference_id    Int?
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  user            users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, activity_type, reference_type, reference_id], name: "engagement_activity_unique")
+  @@index([user_id, created_at])
+}
+
+model aurora_cards {
+  card_id       Int       @id @default(autoincrement())
+  user_id       Int
+  rarity        String    @default("common") @db.VarChar(20)
+  status        String    @default("available") @db.VarChar(20)
+  earned_at     DateTime  @default(now()) @db.Timestamp(6)
+  spent_at      DateTime? @db.Timestamp(6)
+  refunded_at   DateTime? @db.Timestamp(6)
+  event_id      Int?
+  user          users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  event         plot_twist_events? @relation(fields: [event_id], references: [event_id], onDelete: SetNull)
+  submission    plot_twist_submissions?
+
+  @@index([user_id, status])
+}
+
+model plot_twist_events {
+  event_id          Int       @id @default(autoincrement())
+  story_id          Int
+  chapter_id        Int
+  author_id         Int
+  status            String    @default("open") @db.VarChar(20)
+  max_submissions   Int       @default(30)
+  voting_enabled    Boolean   @default(true)
+  closes_at         DateTime  @db.Timestamp(6)
+  closed_at         DateTime? @db.Timestamp(6)
+  reviewed_at       DateTime? @db.Timestamp(6)
+  author_decision   String?   @db.VarChar(30)
+  created_at        DateTime  @default(now()) @db.Timestamp(6)
+  story             stories   @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  chapter           chapters  @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  author            users     @relation("PlotTwistEventAuthor", fields: [author_id], references: [user_id], onDelete: Cascade)
+  submissions       plot_twist_submissions[]
+  cards_reserved    aurora_cards[]
+  chapter_credits   plot_twist_chapter_credits[]
+
+  @@index([story_id, chapter_id])
+  @@index([author_id, status])
+  @@index([status, closes_at])
+}
+
+model plot_twist_submissions {
+  submission_id       Int       @id @default(autoincrement())
+  event_id            Int
+  user_id             Int
+  card_id             Int       @unique
+  twist_title         String    @db.VarChar(120)
+  twist_description   String
+  why_fits            String
+  combined_char_count Int
+  moderation_status   String    @default("pending") @db.VarChar(20)
+  quality_score       Float?
+  originality_label   String?   @db.VarChar(20)
+  excitement_label    String?   @db.VarChar(20)
+  moderation_notes    String?
+  author_status       String    @default("pending") @db.VarChar(20)
+  vote_count          Int       @default(0)
+  created_at          DateTime  @default(now()) @db.Timestamp(6)
+  event               plot_twist_events @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  user                users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  card                aurora_cards @relation(fields: [card_id], references: [card_id], onDelete: Cascade)
+  votes               plot_twist_votes[]
+
+  @@unique([event_id, user_id])
+  @@index([event_id, moderation_status, quality_score])
+}
+
+model plot_twist_votes {
+  id            Int      @id @default(autoincrement())
+  submission_id Int
+  user_id       Int
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  submission    plot_twist_submissions @relation(fields: [submission_id], references: [submission_id], onDelete: Cascade)
+  user          users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([submission_id, user_id])
+  @@index([submission_id])
+}
+
+model plot_twist_contributors {
+  user_id             Int   @id
+  accepted_count      Int   @default(0)
+  stories_influenced  Int   @default(0)
+  total_submissions   Int   @default(0)
+  approval_rate       Float @default(0)
+  influencer_level    Int   @default(1)
+  updated_at          DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  user                users @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model plot_twist_chapter_credits {
+  credit_id    Int      @id @default(autoincrement())
+  event_id     Int
+  chapter_id   Int
+  credit_note  String?
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  event        plot_twist_events @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  chapter      chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  contributors plot_twist_credit_contributors[]
+
+  @@unique([event_id])
+}
+
+model plot_twist_credit_contributors {
+  id            Int      @id @default(autoincrement())
+  credit_id     Int
+  user_id       Int
+  submission_id Int?
+  display_handle String? @db.VarChar(50)
+  credit        plot_twist_chapter_credits @relation(fields: [credit_id], references: [credit_id], onDelete: Cascade)
+
+  @@index([credit_id])
+}
+
+// ==================== AI-Powered Recommendation System ====================
+
+model writing_progress_logs {
+  id                  Int      @id @default(autoincrement())
+  user_id             Int
+  story_id            Int
+  date                DateTime @db.Date
+  word_count          Int      @default(0)
+  time_spent_minutes  Int     @default(0)
+  mood_notes          String?
+  created_at          DateTime @default(now()) @db.Timestamp(6)
+  updated_at          DateTime @default(now()) @updatedAt @db.Timestamp(6)
+
+  user  users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+
+  @@unique([user_id, story_id, date], name: "user_id_story_id_date")
+  @@index([user_id, date])
+  @@index([story_id, date])
+}
+
+
+model story_analysis {
+  id                Int      @id @default(autoincrement())
+  story_id          Int      @unique
+  genres            String?  // JSON: ["romance", "fantasy", "adventure"]
+  primary_themes    String?  // JSON: ["love", "redemption", "survival"]
+  emotions          String?  // JSON: ["hopeful", "melancholic", "intense"]
+  tone              String?  @db.VarChar(50) // romantic, dark, humorous, serious, etc.
+  writing_style     String?  @db.VarChar(100) // lyrical, minimalist, descriptive, etc.
+  complexity_level  String?  @db.VarChar(20) // beginner, intermediate, advanced
+  character_depth   String?  @db.VarChar(20) // simple, nuanced, complex
+  plot_pacing       String?  @db.VarChar(20) // slow, moderate, fast
+  maturity_content  String?  @db.VarChar(255) // comma-separated: violence, romance, language, etc.
+  content_summary   String?  // AI-generated summary of story themes and style
+  analyzed_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  
+  story             stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  
+  @@index([story_id])
+}
+
+model story_embeddings {
+  id                Int      @id @default(autoincrement())
+  story_id          Int      @unique
+  embedding_vector  String   // JSON array of 384-768 dimensional vector (from sentence-transformers)
+  embedding_model   String   @db.VarChar(50) @default("all-MiniLM-L6-v2") // model used for embedding
+  embedding_version Int      @default(1) // for tracking model updates
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  
+  story             stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  
+  @@index([story_id])
+  @@index([embedding_version])
+}
+
+model user_embeddings {
+  id                Int      @id @default(autoincrement())
+  user_id           Int      @unique
+  embedding_vector  String   // JSON array of 384-768 dimensional vector (aggregated from preferences)
+  embedding_model   String   @db.VarChar(50) @default("all-MiniLM-L6-v2")
+  last_updated_at   DateTime @default(now()) @db.Timestamp(6)
+  update_trigger    String?  @db.VarChar(50) // "like", "reading_session", "bookmark", etc.
+  
+  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id])
+}
+
+model recommendation_interactions {
+  id                Int      @id @default(autoincrement())
+  user_id           Int
+  story_id          Int
+  interaction_type  String   @db.VarChar(30) // "skip", "like", "dislike", "hide", "read", "bookmark", "comment", "share"
+  interaction_score Float    @default(0.5) // 0=negative signal, 1=positive signal
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  
+  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id, created_at])
+  @@index([story_id, created_at])
+  @@unique([user_id, story_id, interaction_type])
+}
+
+model recommendation_history {
+  id                Int      @id @default(autoincrement())
+  user_id           Int
+  story_id          Int
+  rank_position     Int      // position in the ranked recommendation list (1, 2, 3...)
+  similarity_score  Float    // cosine similarity score (0-1)
+  weighted_score    Float    // final recommendation score used for ranking
+  recommendation_reason String? // why this story was recommended ("similar_tags", "embedding_match", "trending", etc.)
+  was_clicked       Boolean  @default(false)
+  was_completed     Boolean  @default(false)
+  user_feedback     String?  @db.VarChar(20) // "helpful", "not_relevant", "already_read", null = no feedback
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  feedback_at       DateTime? @db.Timestamp(6)
+  
+  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id, created_at])
+  @@index([story_id])
+  @@index([user_id, rank_position])
+}
+
+model recommendation_stats {
+  id                Int      @id @default(autoincrement())
+  user_id           Int      @unique
+  total_recommendations Int  @default(0)
+  total_clicks      Int      @default(0)
+  total_completions Int      @default(0)
+  click_through_rate Float   @default(0) // clicks / recommendations
+  completion_rate   Float    @default(0) // completions / clicks
+  last_updated      DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  
+  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  
+  @@index([user_id])
+}

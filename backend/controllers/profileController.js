@@ -32,9 +32,10 @@ export const createProfile = async (req, res) => {
     const user_id = req.user.user_id;
     const existing = await Profile.findByUserId(user_id);
     if (existing) {
-      return res
-        .status(400)
-        .json({ message: "Profile already exists for this user." });
+      return res.status(400).json({
+        message: "Profile already exists for this user.",
+        error: "Profile already exists for this user.",
+      });
     }
 
     // Handle_name uniqueness check

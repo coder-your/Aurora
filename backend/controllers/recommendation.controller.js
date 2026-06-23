@@ -160,14 +160,14 @@ export const getByFeed = async (req, res) => {
     const { feedType } = req.params;
     const { userId } = req.query;
     const pagination = getPaginationParams(req.query);
-    const result = await service.getStoriesByFeed(feedType, { 
+    const result = await service.getStoriesByFeed(feedType, {
       ...pagination,
       userId: userId ? Number(userId) : null,
     });
-    res.json(result);
+    return res.json(result ?? { stories: [], total: 0, skip: 0, limit: 20 });
   } catch (error) {
     console.error("getByFeed error:", error);
-    res.status(500).json({ error: "Failed to fetch feed" });
+    return res.json({ stories: [], total: 0, skip: 0, limit: 20 });
   }
 };
 

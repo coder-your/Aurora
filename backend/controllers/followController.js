@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+import { tryAward, ACTIVITY_TYPES } from "../utils/auroraHooks.js";
 
 export const followWriter = async (req, res) => {
   try {
@@ -43,6 +44,11 @@ export const followWriter = async (req, res) => {
         entity_id: follower.user_id,
         data: null,
       },
+    });
+
+    tryAward(follower.user_id, ACTIVITY_TYPES.FOLLOW_AUTHOR, {
+      referenceType: "writer",
+      referenceId: writerId,
     });
 
     return res.status(201).json({ following: true });

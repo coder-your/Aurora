@@ -5,9 +5,13 @@ import express from "express";
 import * as bookCtrl from "../controllers/bookController.js";
 import * as chapCtrl from "../controllers/chapterController.js";
 import { uploadCover } from "../controllers/uploadController.js";
+import aiAssistantRoutes from "./aiAssistant.routes.js";
 
 import * as dictCtrl from "../controllers/dictionaryController.js";
 import * as dashCtrl from "../controllers/dashboardController.js";
+import writingProgressRoutes from "./writingProgress.routes.js";
+
+
 import { subscribeUpdates } from "../controllers/subscriptionController.js";
 import * as followCtrl from "../controllers/followController.js";
 import * as notifCtrl from "../controllers/notificationController.js";
@@ -194,11 +198,19 @@ router.get("/discover/popular-writers", protect, discoveryCtrl.popularWriters);
 router.get("/discover/also-read/:storyId", protect, discoveryCtrl.alsoRead);
 
 // -------------------
+// AI Assistant Routes
+// -------------------
+router.use("/ai-assistant", aiAssistantRoutes);
+
+// -------------------
 // Public newsletter subscription
 // -------------------
 router.post("/subscribe-updates", subscribeUpdates);
 
+// Writing progress (daily logging + streak)
+router.use("/writing", writingProgressRoutes);
 
 export default router;
+
 
 

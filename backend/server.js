@@ -14,6 +14,7 @@ import recommendationRoutes from "./routes/recommendation.routes.js";
 import readingRoutes from "./routes/reading.routes.js";
 import libraryRoutes from "./routes/library.routes.js";
 import moodboardRoutes from "./routes/moodboard.routes.js";
+import auroraCardsRoutes from "./routes/auroraCards.routes.js";
 dotenv.config();
 
 const app = express();
@@ -29,15 +30,27 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+// DO NOT set COOP by default - it breaks OAuth popups.
+// Cross-Origin-Opener-Policy: same-origin blocks window.closed() checks
+// which are essential for popup-based OAuth flows (Google Sign-In, etc).
+// ONLY enable COOP if explicitly requested and really needed.
+const enableCoop = process.env.ENABLE_COOP === "true";
+if (enableCoop) {
+  // Only if explicitly enabled via env var
+  app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    next();
+  });
+}
 
 /* ----------------------------------------------------
-   Security Middleware
+   Security Middleware (default: allow OAuth popups)
 ----------------------------------------------------- */
-app.use(
-  helmet({
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-  })
-);
+app.use(helmet({
+  crossOriginOpenerPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 
 /* ----------------------------------------------------
    Body Parsers
@@ -78,6 +91,7 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/reading", readingRoutes);
 app.use("/api/library", libraryRoutes);
 app.use("/api/moodboards", moodboardRoutes);
+app.use("/api/aurora-cards", auroraCardsRoutes);
 
 /* ----------------------------------------------------
    Error Handling Middleware

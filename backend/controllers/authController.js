@@ -17,6 +17,7 @@ import {
   insertSocialUser
 } from "../models/user.js";
 import { generateOTP } from "../utils/token.js";
+import Profile from "../models/profile.js";
 
 dotenv.config();
 
@@ -75,6 +76,30 @@ const fetchJson = async (url, errorMessage) => {
 // ------------------ Validation ------------------
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const isStrongPassword = (password) => password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password);
+const isValidOTP = (otp) => /^\d{6}$/.test(String(otp || "").trim());
+
+const getAuthProfile = async (user) => {
+  try {
+    const profile = await Profile.findByUserId(user.user_id);
+    if (profile) return profile;
+  } catch (error) {
+    console.warn("verify2FA: profile lookup failed after login", error.message);
+  }
+
+  return {
+    user_id: user.user_id,
+    profile_id: null,
+    handle_name: null,
+    bio: null,
+    gender: null,
+    role: user.is_writer ? "writer" : "reader",
+    profile_image: null,
+    total_books_read: 0,
+    total_books_written: 0,
+    first_name: user.first_name,
+    last_name: user.last_name,
+  };
+};
 
 // ------------------ Signup ------------------
 export const signup = async (req, res) => {
@@ -139,6 +164,21 @@ export const loginWith2FA = async (req, res) => {
   const { email, password } = req.body;
   const emailNorm = (email || "").toString().trim().toLowerCase();
 
+  // Basic validation - log minimal info for debugging when fields are missing
+  if (!emailNorm || !password) {
+    const bodyKeys = Object.keys(req.body || {});
+    console.warn("loginWith2FA: missing credentials", {
+      hasEmail: Boolean(email),
+      hasPassword: Boolean(password),
+      passwordLength: password ? password.length : 0,
+      bodyKeys,
+      contentType: req.headers["content-type"],
+      url: req.originalUrl,
+      method: req.method,
+    });
+    return res.status(400).json({ error: "Email and password are required." });
+  }
+
   try {
     const user = await findUserByEmail(emailNorm);
     if (!user) return res.status(400).json({ error: "Invalid email or password" });
@@ -175,6 +215,14 @@ export const verify2FA = async (req, res) => {
   const { email, otp } = req.body;
   const emailNorm = (email || "").toString().trim().toLowerCase();
 
+  if (!isValidEmail(emailNorm)) {
+    return res.status(400).json({ error: "A valid email is required." });
+  }
+
+  if (!isValidOTP(otp)) {
+    return res.status(400).json({ error: "Enter the 6-digit OTP from your email." });
+  }
+
   try {
     const user = await findUserByEmail(emailNorm);
     if (!user) return res.status(400).json({ error: "User not found" });
@@ -183,7 +231,8 @@ export const verify2FA = async (req, res) => {
     if (!valid) return res.status(400).json({ error: "Invalid or expired OTP" });
 
     const token = issueAuthToken(res, user);
-    return res.json({ message: "Login successful", token });
+    const profile = await getAuthProfile(user);
+    return res.json({ message: "Login successful", token, user, profile });
   } catch (error) {
     res.status(500).json({ error: "2FA verification failed", details: error.message });
   }
