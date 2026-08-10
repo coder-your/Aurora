@@ -13,6 +13,7 @@ import {
 } from "../services/recommendationTracking.service.js";
 import { analyzeStory, getStoryAnalysis } from "../services/storyAnalysis.service.js";
 import { generateStoryEmbedding, generateUserEmbedding } from "../services/embeddingService.js";
+import { getGeminiBookRecommendations } from "../services/geminiRecommendation.service.js";
 
 /**
  * Recommendation Controller
@@ -333,6 +334,40 @@ export const getAnalysisHandler = async (req, res) => {
     console.error("Get analysis error:", error.message);
     return res.status(500).json({
       error: "Failed to retrieve analysis",
+      details: error.message,
+    });
+  }
+};
+
+// POST /api/recommendations/ai/gemini
+// Theme-aware recommendations via Gemini (catalog loaded on server or supplied by client)
+export const getGeminiRecommendationsHandler = async (req, res) => {
+  try {
+    const { storyId, sourceBook, catalogBooks, limit, catalogSize } = req.body || {};
+
+    if (!storyId && !sourceBook) {
+      return res.status(400).json({
+        error: "Provide storyId or sourceBook (with catalogBooks) in the request body",
+      });
+    }
+
+    const result = await getGeminiBookRecommendations({
+      storyId,
+      sourceBook,
+      catalogBooks,
+      limit,
+      catalogSize,
+    });
+
+    return res.json({
+      message: "AI recommendations generated",
+      ...result,
+    });
+  } catch (error) {
+    console.error("Gemini recommendations error:", error.message);
+    const status = error.message === "Story not found" ? 404 : 500;
+    return res.status(status).json({
+      error: "Failed to generate AI recommendations",
       details: error.message,
     });
   }

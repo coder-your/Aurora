@@ -7,70 +7,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "./ERD/-erd.svg"
-}
-
-
 model users {
-  user_id                Int                 @id @default(autoincrement())
-  first_name             String?             @db.VarChar(50)
-  last_name              String?             @db.VarChar(50)
-  email                  String              @unique @db.VarChar(100)
-  password_hash          String              @db.VarChar(255)
-  is_writer              Boolean             @default(false)
-  is_reader              Boolean             @default(true)
-  reset_token            String?             @db.VarChar(255)
-  reset_token_expires    DateTime?           @db.Timestamp(6)
-  created_at             DateTime            @default(now()) @db.Timestamp(6)
-  updated_at             DateTime            @default(now()) @db.Timestamp(6)
-  is_verified            Boolean             @default(false)
-  verification_token     String?             @db.VarChar(255)
-  two_factor_code        String?             @db.VarChar(10)
-  two_factor_expires     DateTime?           @db.Timestamp(6)
-  bookmarks              bookmarks[]
-  chapter_versions       chapter_versions[]
-  chapters               chapters[]
-  moodboards             moodboards[]
-  notifications_sent     notifications[]     @relation("NotificationActor")
-  notifications_received notifications[]     @relation("NotificationRecipient")
-  reading_positions      reading_positions[]
-  reading_sessions       reading_sessions[]
-  stories                stories[]
-  to_be_reads            to_be_read[]
-  profile                user_profiles?
-  read_history           user_read_history[]
-  following_writers      writer_follows[]    @relation("Follower")
-  followers              writer_follows[]    @relation("Writer")
-
-  story_likes       story_likes[]
-  chapter_likes     chapter_likes[]
-  story_shares      story_shares[]
-  chapter_shares    chapter_shares[]
-  story_reviews     story_reviews[]
-  comments          comments[]
-  comment_reactions comment_reactions[]
-  comment_mentions  comment_mentions[]
-  comment_reports   comment_reports[]
-
-  writer_posts      writer_posts[]
-  chapter_author_notes chapter_author_notes[]
-  ai_assistant_history ai_assistant_history[]
-
-  reader_engagement       reader_engagement?
-  aurora_cards            aurora_cards[]
-  engagement_point_logs   engagement_point_logs[]
-  plot_twist_events       plot_twist_events[]       @relation("PlotTwistEventAuthor")
-  plot_twist_submissions  plot_twist_submissions[]
-  plot_twist_votes        plot_twist_votes[]
-  plot_twist_contributor  plot_twist_contributors?
-  
-  user_embedding          user_embeddings?
+  user_id                     Int                           @id @default(autoincrement())
+  first_name                  String?                       @db.VarChar(50)
+  last_name                   String?                       @db.VarChar(50)
+  email                       String                        @unique @db.VarChar(100)
+  password_hash               String                        @db.VarChar(255)
+  is_writer                   Boolean                       @default(false)
+  is_reader                   Boolean                       @default(true)
+  reset_token                 String?                       @db.VarChar(255)
+  reset_token_expires         DateTime?                     @db.Timestamp(6)
+  created_at                  DateTime                      @default(now()) @db.Timestamp(6)
+  updated_at                  DateTime                      @default(now()) @db.Timestamp(6)
+  is_verified                 Boolean                       @default(false)
+  verification_token          String?                       @db.VarChar(255)
+  two_factor_code             String?                       @db.VarChar(10)
+  two_factor_expires          DateTime?                     @db.Timestamp(6)
+  ai_trailer_limit            Int                           @default(3)
+  ai_trailer_used             Int                           @default(0)
+  ai_assistant_history        ai_assistant_history[]
+  aurora_cards                aurora_cards[]
+  bookmarks                   bookmarks[]
+  chapter_author_notes        chapter_author_notes[]
+  chapter_likes               chapter_likes[]
+  chapter_shares              chapter_shares[]
+  chapter_versions            chapter_versions[]
+  chapters                    chapters[]
+  comment_mentions            comment_mentions[]
+  comment_reactions           comment_reactions[]
+  comment_reports             comment_reports[]
+  comments                    comments[]
+  engagement_point_logs       engagement_point_logs[]
+  moodboards                  moodboards[]
+  notifications_sent          notifications[]               @relation("NotificationActor")
+  notifications_received      notifications[]               @relation("NotificationRecipient")
+  plot_twist_contributor      plot_twist_contributors?
+  plot_twist_events           plot_twist_events[]           @relation("PlotTwistEventAuthor")
+  plot_twist_submissions      plot_twist_submissions[]
+  plot_twist_votes            plot_twist_votes[]
+  reader_engagement           reader_engagement?
+  reading_positions           reading_positions[]
+  reading_sessions            reading_sessions[]
+  recommendation_history      recommendation_history[]
   recommendation_interactions recommendation_interactions[]
-  recommendation_history  recommendation_history[]
-  recommendation_stats    recommendation_stats?
+  recommendation_stats        recommendation_stats?
+  stories                     stories[]
+  story_likes                 story_likes[]
+  story_reviews               story_reviews[]
+  story_shares                story_shares[]
+  to_be_reads                 to_be_read[]
+  user_embedding              user_embeddings?
+  profile                     user_profiles?
+  read_history                user_read_history[]
+  following_writers           writer_follows[]              @relation("Follower")
+  followers                   writer_follows[]              @relation("Writer")
+  writer_posts                writer_posts[]
+  community_threads           community_threads[]
+  community_replies           community_replies[]
+  community_thread_votes      community_thread_votes[]
+  community_reply_votes       community_reply_votes[]
+  community_follows           community_follows[]
+  community_saves             community_saves[]
+  book_trailers               book_trailers[]
 }
 
 model user_profiles {
@@ -94,86 +92,82 @@ model user_profiles {
 }
 
 model stories {
-  story_id          Int                 @id @default(autoincrement())
-  author_id         Int
-  title             String?             @db.VarChar(255)
-  description       String?
-  category          String?             @db.VarChar(50)
-  tags              String?
-  cover_url         String?
-  visibility        String              @default("draft") @db.VarChar(20)
-  status            String              @default("in_progress") @db.VarChar(30)
-  is_mature         Boolean             @default(false)
-  has_copyright     Boolean             @default(false)
-  total_words       Int                 @default(0)
-  total_chapters    Int                 @default(0)
-  estimated_minutes Int                 @default(0)
-  last_updated      DateTime            @default(now()) @db.Timestamp(6)
-  is_deleted        Boolean             @default(false)
-  deleted_at        DateTime?           @db.Timestamp(6)
-  created_at        DateTime            @default(now()) @db.Timestamp(6)
-  updated_at        DateTime            @default(now()) @db.Timestamp(6)
-  cover_public_id   String?
-  bookmarks         bookmarks[]
-  chapters          chapters[]
-  moodboards        moodboards[]
-  reading_positions reading_positions[]
-  reading_sessions  reading_sessions[]
-  author            users               @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
-  story_tags        story_tags[]
-  versions          story_versions[]
-  to_be_reads       to_be_read[]
-  read_history      user_read_history[]
-
-  story_likes   story_likes[]
-  comments      comments[]
-  story_reviews story_reviews[]
-  story_shares  story_shares[]
-
-  writer_posts      writer_posts[]
-  story_milestones  story_milestones[]
-  comment_settings  story_comment_settings?
+  story_id                Int                       @id @default(autoincrement())
+  author_id               Int
+  title                   String?                   @db.VarChar(255)
+  description             String?
+  category                String?                   @db.VarChar(50)
+  tags                    String?
+  cover_url               String?
+  visibility              String                    @default("draft") @db.VarChar(20)
+  status                  String                    @default("in_progress") @db.VarChar(30)
+  is_mature               Boolean                   @default(false)
+  has_copyright           Boolean                   @default(false)
+  total_words             Int                       @default(0)
+  total_chapters          Int                       @default(0)
+  estimated_minutes       Int                       @default(0)
+  last_updated            DateTime                  @default(now()) @db.Timestamp(6)
+  is_deleted              Boolean                   @default(false)
+  deleted_at              DateTime?                 @db.Timestamp(6)
+  created_at              DateTime                  @default(now()) @db.Timestamp(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamp(6)
+  cover_public_id         String?
+  ai_turns_limit          Int                       @default(5)
+  ai_turns_used           Int                       @default(0)
+  ai_assistant_history    ai_assistant_history[]
+  bookmarks               bookmarks[]
+  chapters                chapters[]
   comment_keyword_filters comment_keyword_filters[]
-  ai_assistant_history ai_assistant_history[]
-  plot_twist_events    plot_twist_events[]
-
-  ai_turns_used     Int                 @default(0)
-  ai_turns_limit    Int                 @default(5)
-  
-  story_analysis    story_analysis?
-  story_embeddings  story_embeddings?
+  comments                comments[]
+  moodboards              moodboards[]
+  plot_twist_events       plot_twist_events[]
+  reading_positions       reading_positions[]
+  reading_sessions        reading_sessions[]
+  author                  users                     @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  story_analysis          story_analysis?
+  comment_settings        story_comment_settings?
+  story_embeddings        story_embeddings?
+  story_likes             story_likes[]
+  story_milestones        story_milestones[]
+  story_reviews           story_reviews[]
+  story_shares            story_shares[]
+  story_tags              story_tags[]
+  versions                story_versions[]
+  to_be_reads             to_be_read[]
+  read_history            user_read_history[]
+  writer_posts            writer_posts[]
+  community_threads       community_threads[]
+  book_trailers           book_trailers[]
 }
 
 model chapters {
-  chapter_id        Int                 @id @default(autoincrement())
-  story_id          Int
-  author_id         Int
-  title             String?             @db.VarChar(255)
-  content_raw       String?
-  content_html      String?
-  content_delta     String?
-  order_index       Int                 @default(0)
-  word_count        Int                 @default(0)
-  char_count        Int                 @default(0)
-  paragraphs        Int                 @default(0)
-  reading_minutes   Int                 @default(0)
-  is_deleted        Boolean             @default(false)
-  deleted_at        DateTime?           @db.Timestamp(6)
-  created_at        DateTime            @default(now()) @db.Timestamp(6)
-  updated_at        DateTime            @default(now()) @db.Timestamp(6)
-  bookmarks         bookmarks[]
-  versions          chapter_versions[]
-  author            users               @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
-  story             stories             @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  reading_positions reading_positions[]
-
-  chapter_likes  chapter_likes[]
-  comments       comments[]
-  chapter_shares chapter_shares[]
-
-  author_notes chapter_author_notes[]
-  plot_twist_events      plot_twist_events[]
-  plot_twist_credits     plot_twist_chapter_credits[]
+  chapter_id         Int                          @id @default(autoincrement())
+  story_id           Int
+  author_id          Int
+  title              String?                      @db.VarChar(255)
+  content_raw        String?
+  content_html       String?
+  content_delta      String?
+  order_index        Int                          @default(0)
+  word_count         Int                          @default(0)
+  char_count         Int                          @default(0)
+  paragraphs         Int                          @default(0)
+  reading_minutes    Int                          @default(0)
+  is_deleted         Boolean                      @default(false)
+  deleted_at         DateTime?                    @db.Timestamp(6)
+  created_at         DateTime                     @default(now()) @db.Timestamp(6)
+  updated_at         DateTime                     @default(now()) @db.Timestamp(6)
+  bookmarks          bookmarks[]
+  author_notes       chapter_author_notes[]
+  chapter_likes      chapter_likes[]
+  chapter_shares     chapter_shares[]
+  versions           chapter_versions[]
+  author             users                        @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  story              stories                      @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  comments           comments[]
+  plot_twist_credits plot_twist_chapter_credits[]
+  plot_twist_events  plot_twist_events[]
+  reading_positions  reading_positions[]
 }
 
 model chapter_versions {
@@ -507,9 +501,8 @@ model writer_posts {
   is_deleted Boolean  @default(false)
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
-
-  writer users   @relation(fields: [writer_id], references: [user_id], onDelete: Cascade)
-  story  stories? @relation(fields: [story_id], references: [story_id], onDelete: SetNull)
+  story      stories? @relation(fields: [story_id], references: [story_id])
+  writer     users    @relation(fields: [writer_id], references: [user_id], onDelete: Cascade)
 
   @@index([writer_id, created_at])
   @@index([story_id])
@@ -519,13 +512,12 @@ model chapter_author_notes {
   id         Int      @id @default(autoincrement())
   chapter_id Int
   author_id  Int
-  placement  String   @db.VarChar(10) // before/after
+  placement  String   @db.VarChar(10)
   body       String
   created_at DateTime @default(now()) @db.Timestamp(6)
   updated_at DateTime @default(now()) @db.Timestamp(6)
-
-  chapter chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
-  author  users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  author     users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+  chapter    chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
 
   @@unique([chapter_id, placement], name: "chapter_id_placement")
   @@index([author_id, updated_at])
@@ -537,22 +529,20 @@ model story_milestones {
   metric     String   @db.VarChar(30)
   threshold  Int
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
 
   @@unique([story_id, metric, threshold])
   @@index([story_id, created_at])
 }
 
 model story_comment_settings {
-  id            Int      @id @default(autoincrement())
-  story_id       Int      @unique
-  comments_enabled Boolean @default(true)
-  is_muted       Boolean  @default(false)
-  created_at     DateTime @default(now()) @db.Timestamp(6)
-  updated_at     DateTime @default(now()) @db.Timestamp(6)
-
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  id               Int      @id @default(autoincrement())
+  story_id         Int      @unique
+  comments_enabled Boolean  @default(true)
+  is_muted         Boolean  @default(false)
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @db.Timestamp(6)
+  story            stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
 }
 
 model comment_keyword_filters {
@@ -561,36 +551,33 @@ model comment_keyword_filters {
   keyword    String   @db.VarChar(100)
   is_blocked Boolean  @default(true)
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
 
   @@unique([story_id, keyword])
   @@index([story_id, created_at])
 }
 
 model comments {
-  comment_id Int       @id @default(autoincrement())
+  comment_id Int                 @id @default(autoincrement())
   story_id   Int?
   chapter_id Int?
   user_id    Int
   parent_id  Int?
   body       String
-  is_pinned  Boolean   @default(false)
-  is_hidden  Boolean   @default(false)
-  is_deleted Boolean   @default(false)
-  deleted_at DateTime? @db.Timestamp(6)
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime  @default(now()) @db.Timestamp(6)
-
-  story    stories?  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  chapter  chapters? @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
-  user     users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  parent   comments? @relation("CommentThread", fields: [parent_id], references: [comment_id], onDelete: Cascade)
-  replies  comments[] @relation("CommentThread")
-
-  reactions comment_reactions[]
-  mentions  comment_mentions[]
-  reports   comment_reports[]
+  is_pinned  Boolean             @default(false)
+  is_deleted Boolean             @default(false)
+  deleted_at DateTime?           @db.Timestamp(6)
+  created_at DateTime            @default(now()) @db.Timestamp(6)
+  updated_at DateTime            @default(now()) @db.Timestamp(6)
+  is_hidden  Boolean             @default(false)
+  mentions   comment_mentions[]
+  reactions  comment_reactions[]
+  reports    comment_reports[]
+  chapter    chapters?           @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  parent     comments?           @relation("CommentThread", fields: [parent_id], references: [comment_id], onDelete: Cascade)
+  replies    comments[]          @relation("CommentThread")
+  story      stories?            @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user       users               @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@index([story_id, created_at])
   @@index([chapter_id, created_at])
@@ -603,9 +590,8 @@ model comment_reactions {
   user_id    Int
   reaction   String   @db.VarChar(20)
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  comment comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
-  user    users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  comment    comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([comment_id, user_id, reaction], name: "comment_id_user_id_reaction")
   @@index([comment_id, created_at])
@@ -616,42 +602,137 @@ model comment_mentions {
   comment_id        Int
   mentioned_user_id Int
   created_at        DateTime @default(now()) @db.Timestamp(6)
-
-  comment        comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
-  mentioned_user users    @relation(fields: [mentioned_user_id], references: [user_id], onDelete: Cascade)
+  comment           comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
+  mentioned_user    users    @relation(fields: [mentioned_user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([comment_id, mentioned_user_id])
   @@index([mentioned_user_id, created_at])
 }
 
 model comment_reports {
-  id         Int      @id @default(autoincrement())
-  comment_id Int
+  id          Int      @id @default(autoincrement())
+  comment_id  Int
   reporter_id Int
-  reason     String?  @db.VarChar(255)
-  created_at DateTime @default(now()) @db.Timestamp(6)
-
-  comment  comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
-  reporter users    @relation(fields: [reporter_id], references: [user_id], onDelete: Cascade)
+  reason      String?  @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  comment     comments @relation(fields: [comment_id], references: [comment_id], onDelete: Cascade)
+  reporter    users    @relation(fields: [reporter_id], references: [user_id], onDelete: Cascade)
 
   @@unique([comment_id, reporter_id], name: "comment_id_reporter_id")
   @@index([comment_id, created_at])
 }
 
 model story_reviews {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   story_id    Int
   user_id     Int
   rating      Int
   review_text String?
-  created_at  DateTime  @default(now()) @db.Timestamp(6)
-  updated_at  DateTime  @default(now()) @db.Timestamp(6)
-
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  user  users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  story       stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user        users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([story_id, user_id], name: "story_id_user_id")
   @@index([story_id, created_at])
+}
+
+model community_threads {
+  id           Int                  @id @default(autoincrement())
+  user_id      Int
+  title        String               @db.VarChar(255)
+  body         String
+  category     String               @default("general") @db.VarChar(50)
+  channel_type String               @default("General") @db.VarChar(50)
+  target_id    Int?
+  flair        String?              @db.VarChar(50)
+  upvotes      Int                  @default(0)
+  downvotes    Int                  @default(0)
+  is_pinned    Boolean              @default(false)
+  is_deleted   Boolean              @default(false)
+  spoiler      Boolean              @default(false)
+  story_id     Int?
+  created_at   DateTime             @default(now()) @db.Timestamp(6)
+  updated_at   DateTime             @default(now()) @db.Timestamp(6)
+  user         users                @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  story        stories?             @relation(fields: [story_id], references: [story_id], onDelete: SetNull)
+  replies      community_replies[]
+  votes        community_thread_votes[]
+  saves        community_saves[]
+
+  @@index([category, created_at])
+  @@index([user_id, created_at])
+  @@index([story_id])
+  @@index([channel_type, target_id])
+}
+
+model community_replies {
+  id           Int                @id @default(autoincrement())
+  thread_id    Int
+  user_id      Int
+  parent_id    Int?
+  body         String
+  upvotes      Int                @default(0)
+  downvotes    Int                @default(0)
+  spoiler      Boolean            @default(false)
+  is_deleted   Boolean            @default(false)
+  created_at   DateTime           @default(now()) @db.Timestamp(6)
+  updated_at   DateTime           @default(now()) @db.Timestamp(6)
+  thread       community_threads  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user         users              @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  parent       community_replies? @relation("ReplyToReply", fields: [parent_id], references: [id], onDelete: Cascade)
+  children     community_replies[] @relation("ReplyToReply")
+  votes        community_reply_votes[]
+
+  @@index([thread_id, created_at])
+  @@index([user_id, created_at])
+  @@index([parent_id])
+}
+
+model community_thread_votes {
+  id         Int      @id @default(autoincrement())
+  thread_id  Int
+  user_id    Int
+  vote_type  Int      // 1 for upvote, -1 for downvote
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  thread     community_threads @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([thread_id, user_id])
+}
+
+model community_reply_votes {
+  id         Int      @id @default(autoincrement())
+  reply_id   Int
+  user_id    Int
+  vote_type  Int      // 1 for upvote, -1 for downvote
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  reply      community_replies @relation(fields: [reply_id], references: [id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([reply_id, user_id])
+}
+
+model community_follows {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  channel_type String   @db.VarChar(50) // 'Author', 'Genre', 'Book'
+  target_id    Int
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  user         users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, channel_type, target_id])
+}
+
+model community_saves {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  thread_id  Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  thread     community_threads @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, thread_id])
 }
 
 model story_shares {
@@ -660,9 +741,8 @@ model story_shares {
   user_id    Int?
   platform   String   @db.VarChar(30)
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  user  users?  @relation(fields: [user_id], references: [user_id], onDelete: SetNull)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user       users?   @relation(fields: [user_id], references: [user_id])
 
   @@index([story_id, created_at])
 }
@@ -673,9 +753,8 @@ model chapter_shares {
   user_id    Int?
   platform   String   @db.VarChar(30)
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  chapter chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
-  user    users?   @relation(fields: [user_id], references: [user_id], onDelete: SetNull)
+  chapter    chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  user       users?   @relation(fields: [user_id], references: [user_id])
 
   @@index([chapter_id, created_at])
 }
@@ -685,81 +764,78 @@ model ai_assistant_history {
   story_id   Int
   user_id    Int
   capability String   @db.VarChar(50)
-  prompt     String   @db.Text
-  response   String   @db.Text
+  prompt     String
+  response   String
   word_count Int
   created_at DateTime @default(now()) @db.Timestamp(6)
-
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  user  users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  story      stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  user       users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@index([story_id])
   @@index([user_id])
   @@index([created_at])
 }
 
-// ─── Aurora Cards & Plot Twist ─────────────────────────────────────────────
-
 model reader_engagement {
-  user_id               Int      @id
-  total_points          Int      @default(0)
-  points_in_current_cycle Int    @default(0)
-  total_cards_earned    Int      @default(0)
-  daily_streak          Int      @default(0)
-  last_streak_date      DateTime? @db.Date
-  updated_at            DateTime @default(now()) @updatedAt @db.Timestamp(6)
-  user                  users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id                 Int       @id
+  total_points            Int       @default(0)
+  points_in_current_cycle Int       @default(0)
+  total_cards_earned      Int       @default(0)
+  daily_streak            Int       @default(0)
+  last_streak_date        DateTime? @db.Date
+  updated_at              DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  user                    users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
 
 model engagement_point_logs {
-  id              Int      @id @default(autoincrement())
-  user_id         Int
-  activity_type   String   @db.VarChar(50)
-  points          Int
-  reference_type  String?  @db.VarChar(30)
-  reference_id    Int?
-  created_at      DateTime @default(now()) @db.Timestamp(6)
-  user            users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  id             Int      @id @default(autoincrement())
+  user_id        Int
+  activity_type  String   @db.VarChar(50)
+  points         Int
+  reference_type String?  @db.VarChar(30)
+  reference_id   Int?
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  user           users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, activity_type, reference_type, reference_id], name: "engagement_activity_unique")
   @@index([user_id, created_at])
 }
 
 model aurora_cards {
-  card_id       Int       @id @default(autoincrement())
-  user_id       Int
-  rarity        String    @default("common") @db.VarChar(20)
-  status        String    @default("available") @db.VarChar(20)
-  earned_at     DateTime  @default(now()) @db.Timestamp(6)
-  spent_at      DateTime? @db.Timestamp(6)
-  refunded_at   DateTime? @db.Timestamp(6)
-  event_id      Int?
-  user          users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  event         plot_twist_events? @relation(fields: [event_id], references: [event_id], onDelete: SetNull)
-  submission    plot_twist_submissions?
+  card_id     Int                     @id @default(autoincrement())
+  user_id     Int
+  rarity      String                  @default("common") @db.VarChar(20)
+  status      String                  @default("available") @db.VarChar(20)
+  earned_at   DateTime                @default(now()) @db.Timestamp(6)
+  spent_at    DateTime?               @db.Timestamp(6)
+  refunded_at DateTime?               @db.Timestamp(6)
+  event_id    Int?
+  event       plot_twist_events?      @relation(fields: [event_id], references: [event_id])
+  user        users                   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  submission  plot_twist_submissions?
 
   @@index([user_id, status])
 }
 
 model plot_twist_events {
-  event_id          Int       @id @default(autoincrement())
-  story_id          Int
-  chapter_id        Int
-  author_id         Int
-  status            String    @default("open") @db.VarChar(20)
-  max_submissions   Int       @default(30)
-  voting_enabled    Boolean   @default(true)
-  closes_at         DateTime  @db.Timestamp(6)
-  closed_at         DateTime? @db.Timestamp(6)
-  reviewed_at       DateTime? @db.Timestamp(6)
-  author_decision   String?   @db.VarChar(30)
-  created_at        DateTime  @default(now()) @db.Timestamp(6)
-  story             stories   @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  chapter           chapters  @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
-  author            users     @relation("PlotTwistEventAuthor", fields: [author_id], references: [user_id], onDelete: Cascade)
-  submissions       plot_twist_submissions[]
-  cards_reserved    aurora_cards[]
-  chapter_credits   plot_twist_chapter_credits[]
+  event_id        Int                         @id @default(autoincrement())
+  story_id        Int
+  chapter_id      Int
+  author_id       Int
+  status          String                      @default("open") @db.VarChar(20)
+  max_submissions Int                         @default(30)
+  voting_enabled  Boolean                     @default(true)
+  closes_at       DateTime                    @db.Timestamp(6)
+  closed_at       DateTime?                   @db.Timestamp(6)
+  reviewed_at     DateTime?                   @db.Timestamp(6)
+  author_decision String?                     @db.VarChar(30)
+  created_at      DateTime                    @default(now()) @db.Timestamp(6)
+  cards_reserved  aurora_cards[]
+  chapter_credits plot_twist_chapter_credits?
+  author          users                       @relation("PlotTwistEventAuthor", fields: [author_id], references: [user_id], onDelete: Cascade)
+  chapter         chapters                    @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  story           stories                     @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  submissions     plot_twist_submissions[]
 
   @@index([story_id, chapter_id])
   @@index([author_id, status])
@@ -767,25 +843,25 @@ model plot_twist_events {
 }
 
 model plot_twist_submissions {
-  submission_id       Int       @id @default(autoincrement())
+  submission_id       Int                @id @default(autoincrement())
   event_id            Int
   user_id             Int
-  card_id             Int       @unique
-  twist_title         String    @db.VarChar(120)
+  card_id             Int                @unique
+  twist_title         String             @db.VarChar(120)
   twist_description   String
   why_fits            String
   combined_char_count Int
-  moderation_status   String    @default("pending") @db.VarChar(20)
+  moderation_status   String             @default("pending") @db.VarChar(20)
   quality_score       Float?
-  originality_label   String?   @db.VarChar(20)
-  excitement_label    String?   @db.VarChar(20)
+  originality_label   String?            @db.VarChar(20)
+  excitement_label    String?            @db.VarChar(20)
   moderation_notes    String?
-  author_status       String    @default("pending") @db.VarChar(20)
-  vote_count          Int       @default(0)
-  created_at          DateTime  @default(now()) @db.Timestamp(6)
-  event               plot_twist_events @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
-  user                users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  card                aurora_cards @relation(fields: [card_id], references: [card_id], onDelete: Cascade)
+  author_status       String             @default("pending") @db.VarChar(20)
+  vote_count          Int                @default(0)
+  created_at          DateTime           @default(now()) @db.Timestamp(6)
+  card                aurora_cards       @relation(fields: [card_id], references: [card_id], onDelete: Cascade)
+  event               plot_twist_events  @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  user                users              @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   votes               plot_twist_votes[]
 
   @@unique([event_id, user_id])
@@ -793,120 +869,95 @@ model plot_twist_submissions {
 }
 
 model plot_twist_votes {
-  id            Int      @id @default(autoincrement())
+  id            Int                    @id @default(autoincrement())
   submission_id Int
   user_id       Int
-  created_at    DateTime @default(now()) @db.Timestamp(6)
+  created_at    DateTime               @default(now()) @db.Timestamp(6)
   submission    plot_twist_submissions @relation(fields: [submission_id], references: [submission_id], onDelete: Cascade)
-  user          users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user          users                  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([submission_id, user_id])
   @@index([submission_id])
 }
 
 model plot_twist_contributors {
-  user_id             Int   @id
-  accepted_count      Int   @default(0)
-  stories_influenced  Int   @default(0)
-  total_submissions   Int   @default(0)
-  approval_rate       Float @default(0)
-  influencer_level    Int   @default(1)
-  updated_at          DateTime @default(now()) @updatedAt @db.Timestamp(6)
-  user                users @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id            Int      @id
+  accepted_count     Int      @default(0)
+  stories_influenced Int      @default(0)
+  total_submissions  Int      @default(0)
+  approval_rate      Float    @default(0)
+  influencer_level   Int      @default(1)
+  updated_at         DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  user               users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
 
 model plot_twist_chapter_credits {
-  credit_id    Int      @id @default(autoincrement())
-  event_id     Int
+  credit_id    Int                              @id @default(autoincrement())
+  event_id     Int                              @unique
   chapter_id   Int
   credit_note  String?
-  created_at   DateTime @default(now()) @db.Timestamp(6)
-  event        plot_twist_events @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
-  chapter      chapters @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  created_at   DateTime                         @default(now()) @db.Timestamp(6)
+  twist_title  String?                          @db.VarChar(200)
+  twist_text   String?
+  chapter      chapters                         @relation(fields: [chapter_id], references: [chapter_id], onDelete: Cascade)
+  event        plot_twist_events                @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
   contributors plot_twist_credit_contributors[]
-
-  @@unique([event_id])
 }
 
 model plot_twist_credit_contributors {
-  id            Int      @id @default(autoincrement())
-  credit_id     Int
-  user_id       Int
-  submission_id Int?
-  display_handle String? @db.VarChar(50)
-  credit        plot_twist_chapter_credits @relation(fields: [credit_id], references: [credit_id], onDelete: Cascade)
+  id             Int                        @id @default(autoincrement())
+  credit_id      Int
+  user_id        Int
+  submission_id  Int?
+  display_handle String?                    @db.VarChar(50)
+  credit         plot_twist_chapter_credits @relation(fields: [credit_id], references: [credit_id], onDelete: Cascade)
 
   @@index([credit_id])
 }
 
-// ==================== AI-Powered Recommendation System ====================
-
-model writing_progress_logs {
-  id                  Int      @id @default(autoincrement())
-  user_id             Int
-  story_id            Int
-  date                DateTime @db.Date
-  word_count          Int      @default(0)
-  time_spent_minutes  Int     @default(0)
-  mood_notes          String?
-  created_at          DateTime @default(now()) @db.Timestamp(6)
-  updated_at          DateTime @default(now()) @updatedAt @db.Timestamp(6)
-
-  user  users   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  story stories @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-
-  @@unique([user_id, story_id, date], name: "user_id_story_id_date")
-  @@index([user_id, date])
-  @@index([story_id, date])
-}
-
-
 model story_analysis {
-  id                Int      @id @default(autoincrement())
-  story_id          Int      @unique
-  genres            String?  // JSON: ["romance", "fantasy", "adventure"]
-  primary_themes    String?  // JSON: ["love", "redemption", "survival"]
-  emotions          String?  // JSON: ["hopeful", "melancholic", "intense"]
-  tone              String?  @db.VarChar(50) // romantic, dark, humorous, serious, etc.
-  writing_style     String?  @db.VarChar(100) // lyrical, minimalist, descriptive, etc.
-  complexity_level  String?  @db.VarChar(20) // beginner, intermediate, advanced
-  character_depth   String?  @db.VarChar(20) // simple, nuanced, complex
-  plot_pacing       String?  @db.VarChar(20) // slow, moderate, fast
-  maturity_content  String?  @db.VarChar(255) // comma-separated: violence, romance, language, etc.
-  content_summary   String?  // AI-generated summary of story themes and style
-  analyzed_at       DateTime @default(now()) @db.Timestamp(6)
-  updated_at        DateTime @default(now()) @updatedAt @db.Timestamp(6)
-  
-  story             stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  
+  id               Int      @id @default(autoincrement())
+  story_id         Int      @unique
+  genres           String?
+  primary_themes   String?
+  emotions         String?
+  tone             String?  @db.VarChar(50)
+  writing_style    String?  @db.VarChar(100)
+  complexity_level String?  @db.VarChar(20)
+  character_depth  String?  @db.VarChar(20)
+  plot_pacing      String?  @db.VarChar(20)
+  maturity_content String?  @db.VarChar(255)
+  content_summary  String?
+  analyzed_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  story            stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+
   @@index([story_id])
 }
 
 model story_embeddings {
   id                Int      @id @default(autoincrement())
   story_id          Int      @unique
-  embedding_vector  String   // JSON array of 384-768 dimensional vector (from sentence-transformers)
-  embedding_model   String   @db.VarChar(50) @default("all-MiniLM-L6-v2") // model used for embedding
-  embedding_version Int      @default(1) // for tracking model updates
+  embedding_vector  String
+  embedding_model   String   @default("all-MiniLM-L6-v2") @db.VarChar(50)
+  embedding_version Int      @default(1)
   created_at        DateTime @default(now()) @db.Timestamp(6)
   updated_at        DateTime @default(now()) @updatedAt @db.Timestamp(6)
-  
   story             stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
-  
+
   @@index([story_id])
   @@index([embedding_version])
 }
 
 model user_embeddings {
-  id                Int      @id @default(autoincrement())
-  user_id           Int      @unique
-  embedding_vector  String   // JSON array of 384-768 dimensional vector (aggregated from preferences)
-  embedding_model   String   @db.VarChar(50) @default("all-MiniLM-L6-v2")
-  last_updated_at   DateTime @default(now()) @db.Timestamp(6)
-  update_trigger    String?  @db.VarChar(50) // "like", "reading_session", "bookmark", etc.
-  
-  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  
+  id               Int      @id @default(autoincrement())
+  user_id          Int      @unique
+  embedding_vector String
+  embedding_model  String   @default("all-MiniLM-L6-v2") @db.VarChar(50)
+  last_updated_at  DateTime @default(now()) @db.Timestamp(6)
+  update_trigger   String?  @db.VarChar(50)
+  user             users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
   @@index([user_id])
 }
 
@@ -914,49 +965,65 @@ model recommendation_interactions {
   id                Int      @id @default(autoincrement())
   user_id           Int
   story_id          Int
-  interaction_type  String   @db.VarChar(30) // "skip", "like", "dislike", "hide", "read", "bookmark", "comment", "share"
-  interaction_score Float    @default(0.5) // 0=negative signal, 1=positive signal
+  interaction_type  String   @db.VarChar(30)
+  interaction_score Float    @default(0.5)
   created_at        DateTime @default(now()) @db.Timestamp(6)
-  
   user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  
+
+  @@unique([user_id, story_id, interaction_type])
   @@index([user_id, created_at])
   @@index([story_id, created_at])
-  @@unique([user_id, story_id, interaction_type])
 }
 
 model recommendation_history {
-  id                Int      @id @default(autoincrement())
-  user_id           Int
-  story_id          Int
-  rank_position     Int      // position in the ranked recommendation list (1, 2, 3...)
-  similarity_score  Float    // cosine similarity score (0-1)
-  weighted_score    Float    // final recommendation score used for ranking
-  recommendation_reason String? // why this story was recommended ("similar_tags", "embedding_match", "trending", etc.)
-  was_clicked       Boolean  @default(false)
-  was_completed     Boolean  @default(false)
-  user_feedback     String?  @db.VarChar(20) // "helpful", "not_relevant", "already_read", null = no feedback
-  created_at        DateTime @default(now()) @db.Timestamp(6)
-  feedback_at       DateTime? @db.Timestamp(6)
-  
-  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  
+  id                    Int       @id @default(autoincrement())
+  user_id               Int
+  story_id              Int
+  rank_position         Int
+  similarity_score      Float
+  weighted_score        Float
+  recommendation_reason String?
+  was_clicked           Boolean   @default(false)
+  was_completed         Boolean   @default(false)
+  user_feedback         String?   @db.VarChar(20)
+  created_at            DateTime  @default(now()) @db.Timestamp(6)
+  feedback_at           DateTime? @db.Timestamp(6)
+  user                  users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
   @@index([user_id, created_at])
   @@index([story_id])
   @@index([user_id, rank_position])
 }
 
 model recommendation_stats {
-  id                Int      @id @default(autoincrement())
-  user_id           Int      @unique
-  total_recommendations Int  @default(0)
-  total_clicks      Int      @default(0)
-  total_completions Int      @default(0)
-  click_through_rate Float   @default(0) // clicks / recommendations
-  completion_rate   Float    @default(0) // completions / clicks
-  last_updated      DateTime @default(now()) @updatedAt @db.Timestamp(6)
-  
-  user              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  
+  id                    Int      @id @default(autoincrement())
+  user_id               Int      @unique
+  total_recommendations Int      @default(0)
+  total_clicks          Int      @default(0)
+  total_completions     Int      @default(0)
+  click_through_rate    Float    @default(0)
+  completion_rate       Float    @default(0)
+  last_updated          DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  user                  users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
   @@index([user_id])
+}
+
+model book_trailers {
+  trailer_id       Int      @id @default(autoincrement())
+  story_id         Int
+  author_id        Int
+  video_url        String
+  video_path       String?
+  source           String   @default("AI_GENERATED") @db.VarChar(30)
+  status           String   @default("processing") @db.VarChar(20)
+  duration_seconds Int      @default(15)
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  story            stories  @relation(fields: [story_id], references: [story_id], onDelete: Cascade)
+  author           users    @relation(fields: [author_id], references: [user_id], onDelete: Cascade)
+
+  @@index([story_id])
+  @@index([author_id])
+  @@index([status])
 }

@@ -1,4 +1,5 @@
 import prisma from "../utils/prisma.js";
+import { getGeminiFeedRecommendations } from "./geminiRecommendation.service.js";
 
 // Standard author include with handle_name from profile
 // NOTE: profile.first_name/last_name take precedence over users.first_name/last_name
@@ -33,6 +34,17 @@ const splitTags = (tags) => {
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
+};
+
+const normalizeTextValue = (value) => {
+  if (value == null) return "";
+  return String(value).trim();
+};
+
+const buildTextContainsClause = (value) => {
+  const normalized = normalizeTextValue(value);
+  if (!normalized) return null;
+  return { contains: normalized, mode: "insensitive" };
 };
 
 const daysAgo = (d) => {
@@ -308,17 +320,25 @@ const getPagination = (options = {}) => {
 export const getStoriesByCategory = async (category, options = {}) => {
   try {
     const { skip, take } = getPagination(options);
+    const normalizedCategory = normalizeTextValue(category);
+    if (!normalizedCategory) {
+      return { stories: [], total: 0, skip, limit: take };
+    }
+
+    const where = {
+      ...publishedPublicWhere,
+      category: buildTextContainsClause(normalizedCategory),
+    };
+
     const [stories, total] = await Promise.all([
       prisma.stories.findMany({
-        where: { category, ...publishedPublicWhere },
+        where,
         include: authorInclude,
         orderBy: { last_updated: "desc" },
         skip,
         take,
       }),
-      prisma.stories.count({
-        where: { category, ...publishedPublicWhere },
-      }),
+      prisma.stories.count({ where }),
     ]);
     return { stories, total, skip, limit: take };
   } catch (error) {
@@ -333,7 +353,16 @@ export const getStoriesByCategory = async (category, options = {}) => {
 export const getStoriesByTag = async (tag, options = {}) => {
   try {
     const { skip, take } = getPagination(options);
-    const where = { tags: { contains: tag }, ...publishedPublicWhere };
+    const normalizedTag = normalizeTextValue(tag);
+    if (!normalizedTag) {
+      return { stories: [], total: 0, skip, limit: take };
+    }
+
+    const where = {
+      ...publishedPublicWhere,
+      tags: buildTextContainsClause(normalizedTag),
+    };
+
     const [stories, total] = await Promise.all([
       prisma.stories.findMany({
         where,
@@ -503,7 +532,56 @@ export const getStoriesByFeed = async (feedType, options = {}) => {
     if (!config) return { stories: [], total: 0, skip: 0, limit: DEFAULT_LIMIT };
 
     const { skip, take } = getPagination(options);
+    const feedName = getFeedDisplayName(feedType);
 
+    // AI-Powered Recommendation Attempt
+    try {
+      // Fetch a broad catalog of candidates for Gemini to choose from
+      const candidates = await prisma.stories.findMany({
+        where: publishedPublicWhere,
+        include: {
+          story_analysis: true,
+          ...authorInclude,
+        },
+        orderBy: { last_updated: "desc" },
+        take: 80,
+      });
+
+      let userProfile = { categories: [], tags: [] };
+      if (options.userId) {
+        const profile = await buildUserTasteProfile(Number(options.userId));
+        userProfile.categories = topKeys(profile.categoryWeights, 5);
+        userProfile.tags = topKeys(profile.tagWeights, 10);
+      }
+
+      const rawRecs = await getGeminiFeedRecommendations({
+        feedName,
+        userProfile,
+        catalogBooks: candidates,
+        limit: take,
+      });
+
+      const validIds = new Set(candidates.map((c) => c.story_id));
+      const byId = new Map(candidates.map((c) => [c.story_id, c]));
+
+      const stories = rawRecs
+        .map((rec) => {
+          const id = Number(rec.story_id);
+          if (!validIds.has(id)) return null;
+          const story = byId.get(id);
+          if (!story) return null;
+          return { ...story, ai_reason: rec.reason };
+        })
+        .filter(Boolean);
+
+      if (stories.length > 0) {
+        return { stories, total: stories.length, skip, limit: take, engine: "gemini" };
+      }
+    } catch (aiError) {
+      console.warn("AI Feed Generation Failed, falling back to legacy:", aiError.message);
+    }
+
+    // --- Legacy Fallback Logic ---
     // Special cases
     if (feedType === "fresh-updates") {
       return getRecentlyUpdated(options);
@@ -521,38 +599,54 @@ export const getStoriesByFeed = async (feedType, options = {}) => {
     const hasTags = config.tags && config.tags.length > 0;
     const hasCategories = config.categories && config.categories.length > 0;
 
-    // Base where conditions
+    const tagConditions = hasTags
+      ? config.tags
+          .map((tag) => ({ tags: buildTextContainsClause(tag) }))
+          .filter(Boolean)
+      : [];
+
+    const categoryConditions = hasCategories
+      ? config.categories
+          .map((category) => ({ category: buildTextContainsClause(category) }))
+          .filter(Boolean)
+      : [];
+
     let whereConditions = { ...publishedPublicWhere };
 
-    // Build tag conditions
-    const tagConditions = hasTags
-      ? config.tags.map(tag => ({ tags: { contains: tag } }))
-      : [];
-
-    // Build category conditions
-    const categoryConditions = hasCategories
-      ? [{ category: { in: config.categories } }]
-      : [];
-
-    // Strategy: Use OR for broader results (more forgiving)
     if (hasTags && hasCategories) {
-      whereConditions.OR = [...tagConditions, ...categoryConditions];
+      whereConditions.AND = [
+        { OR: tagConditions },
+        { OR: categoryConditions },
+      ];
     } else if (hasTags) {
       whereConditions.OR = tagConditions;
     } else if (hasCategories) {
       whereConditions.OR = categoryConditions;
     }
 
-    const [rawStories, total] = await Promise.all([
-      prisma.stories.findMany({
-        where: whereConditions,
-        include: authorInclude,
-        orderBy: { last_updated: "desc" },
-        skip,
-        take,
-      }),
-      prisma.stories.count({ where: whereConditions }),
-    ]);
+    const fetchStories = async (where) => {
+      const [stories, total] = await Promise.all([
+        prisma.stories.findMany({
+          where,
+          include: authorInclude,
+          orderBy: { last_updated: "desc" },
+          skip,
+          take,
+        }),
+        prisma.stories.count({ where }),
+      ]);
+      return { stories, total };
+    };
+
+    let { stories: rawStories, total } = await fetchStories(whereConditions);
+
+    if (hasTags && hasCategories && rawStories.length < Math.max(3, take)) {
+      const fallbackWhere = {
+        ...publishedPublicWhere,
+        OR: [...tagConditions, ...categoryConditions],
+      };
+      ({ stories: rawStories, total } = await fetchStories(fallbackWhere));
+    }
 
     // Optional personalization: if userId is provided, reorder within the feed
     if (options.userId) {
@@ -738,6 +832,55 @@ export const getPersonalizedRecommendations = async (userId, options = {}) => {
     if (!topTags.length && !topCategories.length && !profile.followedWriterIds.size) {
       return getRecentlyUpdated(options);
     }
+
+    // AI-Powered Personalized Recommendations Attempt
+    try {
+      const candidates = await prisma.stories.findMany({
+        where: {
+          ...publishedPublicWhere,
+          ...(profile.excludeStoryIds.size ? { story_id: { notIn: Array.from(profile.excludeStoryIds) } } : {}),
+        },
+        include: {
+          story_analysis: true,
+          ...authorInclude,
+        },
+        orderBy: { last_updated: "desc" },
+        take: 100,
+      });
+
+      const userProfile = {
+        categories: topCategories,
+        tags: topTags,
+      };
+
+      const rawRecs = await getGeminiFeedRecommendations({
+        feedName: "Your Personalized Reading Path",
+        userProfile,
+        catalogBooks: candidates,
+        limit: take,
+      });
+
+      const validIds = new Set(candidates.map((c) => c.story_id));
+      const byId = new Map(candidates.map((c) => [c.story_id, c]));
+
+      const stories = rawRecs
+        .map((rec) => {
+          const id = Number(rec.story_id);
+          if (!validIds.has(id)) return null;
+          const story = byId.get(id);
+          if (!story) return null;
+          return { ...story, ai_reason: rec.reason };
+        })
+        .filter(Boolean);
+
+      if (stories.length > 0) {
+        return { stories, total: stories.length, skip, limit: take, engine: "gemini" };
+      }
+    } catch (aiError) {
+      console.warn("AI Personalized Generation Failed, falling back to legacy:", aiError.message);
+    }
+
+    // --- Legacy Fallback Logic ---
 
     const where = {
       ...publishedPublicWhere,

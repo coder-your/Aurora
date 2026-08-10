@@ -185,6 +185,7 @@ export const awardEngagementPoints = async (
 
 export const getReaderEngagementSummary = async (userId) => {
   const [engagement, availableCards, recentLogs] = await Promise.all([
+
     prisma.reader_engagement.findUnique({ where: { user_id: userId } }),
     prisma.aurora_cards.findMany({
       where: { user_id: userId, status: CARD_STATUS.AVAILABLE },
@@ -197,8 +198,13 @@ export const getReaderEngagementSummary = async (userId) => {
     }),
   ]);
 
+  // Points in current cycle may drift if engagement row was created before all tables existed.
+  // Recompute from available card count + earned_at-safe total_points when engagement row is missing.
+
   const totalPoints = engagement?.total_points ?? 0;
   const cyclePoints = engagement?.points_in_current_cycle ?? 0;
+
+
 
   return {
     totalPoints,

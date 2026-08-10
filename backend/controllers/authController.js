@@ -286,7 +286,8 @@ export const loginWithGoogleOAuth = async (req, res) => {
     });
 
     const token = issueAuthToken(res, user);
-    return res.json({ message: "Login successful", token });
+    const authProfile = await getAuthProfile(user);
+    return res.json({ message: "Login successful", token, profile: authProfile });
   } catch (error) {
     return res.status(500).json({ error: "Google authentication failed", details: error.message });
   }

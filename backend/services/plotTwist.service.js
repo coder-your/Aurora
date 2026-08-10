@@ -1,16 +1,19 @@
 import prisma from "../utils/prisma.js";
-import { moderatePlotTwistSubmission } from "./plotTwistModeration.service.js";
 import {
   EVENT_STATUS,
   CARD_STATUS,
   MODERATION_STATUS,
   PLOT_TWIST_LIMITS,
   CARD_RARITY,
+  ACTIVITY_TYPES,
 } from "../constants/aurora.constants.js";
+import { tryAward } from "../utils/auroraHooks.js";
 
-  const HOURS_48_MS = PLOT_TWIST_LIMITS.EVENT_DURATION_HOURS * 60 * 60 * 1000;
 
-  // Note: Twist length enforcement is handled in moderatePlotTwistSubmission (300 chars for description).
+const HOURS_48_MS = PLOT_TWIST_LIMITS.EVENT_DURATION_HOURS * 60 * 60 * 1000;
+
+// Note: Twist length enforcement is handled in moderatePlotTwistSubmission (300 chars for description).
+
 
 export const expireStaleEvents = async () => {
   const now = new Date();
@@ -177,18 +180,12 @@ export const submitPlotTwist = async (
   });
   if (!card) throw Object.assign(new Error("Invalid or unavailable Aurora Card."), { status: 400 });
 
-  const moderation = await moderatePlotTwistSubmission({
+  // No AI moderation - writer decides to accept/reject
+  const submissionBody = {
     twistTitle,
     twistDescription,
     whyFits,
-    chapterTitle: event.chapter?.title,
-    storyTitle: event.story?.title,
-    existingTitles: event.submissions.map((s) => s.twist_title),
-  });
-
-  if (!moderation.ok && moderation.message) {
-    throw Object.assign(new Error(moderation.message), { status: 400 });
-  }
+  };
 
   const result = await prisma.$transaction(async (tx) => {
     await tx.aurora_cards.update({
@@ -204,12 +201,11 @@ export const submitPlotTwist = async (
         twist_title: (twistTitle || "").trim(),
         twist_description: (twistDescription || "").trim(),
         why_fits: (whyFits || "").trim(),
-        combined_char_count: moderation.combinedLen,
-        moderation_status: moderation.moderationStatus,
-        quality_score: moderation.qualityScore ?? null,
-        originality_label: moderation.originalityLabel ?? null,
-        excitement_label: moderation.excitementLabel ?? null,
-        moderation_notes: moderation.moderationNotes ?? null,
+        combined_char_count: (twistTitle?.length || 0) + (twistDescription?.length || 0) + (whyFits?.length || 0),
+        moderation_status: MODERATION_STATUS.APPROVED, // Auto-approve, writer decides
+        quality_score: 80, // Default score
+        originality_label: "Creative",
+        excitement_label: "Exciting",
       },
     });
 
@@ -232,23 +228,19 @@ export const submitPlotTwist = async (
     return submission;
   });
 
-  if (moderation.moderationStatus === MODERATION_STATUS.REJECTED) {
-    return {
-      submissionId: result.submission_id,
-      moderationStatus: MODERATION_STATUS.REJECTED,
-      message:
-        "Your card was used, but the twist did not pass quality checks. Contact support if you believe this was a mistake.",
-      qualityScore: moderation.qualityScore,
-    };
-  }
+  tryAward(userId, ACTIVITY_TYPES.PLOT_TWIST_APPROVED, {
+    referenceType: "plot_twist_submission",
+    referenceId: result.submission_id,
+  });
 
   return {
     submissionId: result.submission_id,
     moderationStatus: MODERATION_STATUS.APPROVED,
-    qualityScore: moderation.qualityScore,
-    message: "Plot twist submitted successfully.",
+    qualityScore: 80,
+    message: "Plot twist submitted! The writer will review and decide.",
   };
 };
+
 
 export const getAuthorEventDashboard = async (authorId, eventId) => {
   await expireStaleEvents();
@@ -256,11 +248,10 @@ export const getAuthorEventDashboard = async (authorId, eventId) => {
   const event = await prisma.plot_twist_events.findFirst({
     where: { event_id: eventId, author_id: authorId },
     include: {
-      story: { select: { title: true } },
-      chapter: { select: { title: true } },
+      story: { select: { story_id: true, title: true } },
+      chapter: { select: { chapter_id: true, title: true } },
       submissions: {
-        where: { moderation_status: MODERATION_STATUS.APPROVED },
-        orderBy: [{ quality_score: "desc" }, { vote_count: "desc" }],
+        orderBy: [{ created_at: "asc" }],
         include: {
           user: {
             select: {
@@ -275,14 +266,23 @@ export const getAuthorEventDashboard = async (authorId, eventId) => {
 
   if (!event) throw Object.assign(new Error("Event not found."), { status: 404 });
 
-  const topForVoting = [...event.submissions]
+  // Get all chapters for this story (to show in dropdown)
+  const allChapters = await prisma.chapters.findMany({
+    where: { story_id: event.story_id, is_deleted: false },
+    orderBy: { order_index: "asc" },
+    select: { chapter_id: true, order_index: true, title: true },
+  });
+
+  const submissions = event.submissions || [];
+
+  const topForVoting = [...submissions]
     .sort((a, b) => (b.quality_score || 0) - (a.quality_score || 0))
     .slice(0, PLOT_TWIST_LIMITS.VOTING_TOP_N);
 
-  const communityFavorite = [...event.submissions].sort(
+  const communityFavorite = [...submissions].sort(
     (a, b) => b.vote_count - a.vote_count
   )[0];
-  const aiFavorite = event.submissions[0];
+  const aiFavorite = submissions[0];
 
   const mapSub = (s, index) => ({
     submissionId: s.submission_id,
@@ -294,6 +294,7 @@ export const getAuthorEventDashboard = async (authorId, eventId) => {
     originality: s.originality_label,
     excitement: s.excitement_label,
     voteCount: s.vote_count,
+    moderationStatus: s.moderation_status,
     authorStatus: s.author_status,
     submitter: {
       userId: s.user_id,
@@ -306,12 +307,19 @@ export const getAuthorEventDashboard = async (authorId, eventId) => {
 
   return {
     eventId: event.event_id,
+    storyId: event.story_id,
+    chapterId: event.chapter_id,
     status: event.status,
     storyTitle: event.story?.title,
     chapterTitle: event.chapter?.title,
     closesAt: event.closes_at,
     authorDecision: event.author_decision,
     submissions: event.submissions.map(mapSub),
+    chapters: allChapters.map((c) => ({
+      chapterId: c.chapter_id,
+      chapterNumber: c.order_index + 1,
+      title: c.title,
+    })),
     insights: {
       communityFavoriteId: communityFavorite?.submission_id ?? null,
       aiFavoriteId: aiFavorite?.submission_id ?? null,
@@ -358,7 +366,7 @@ export const voteOnSubmission = async (userId, submissionId) => {
 export const resolveAuthorDecision = async (
   authorId,
   eventId,
-  { decision, acceptedSubmissionIds = [], creditChapterId, creditNote }
+  { decision, acceptedSubmissionIds = [], creditChapterId, creditNote, twistTitle, twistText }
 ) => {
   const event = await prisma.plot_twist_events.findFirst({
     where: { event_id: eventId, author_id: authorId },
@@ -418,21 +426,42 @@ export const resolveAuthorDecision = async (
           where: { user_id: sub.user_id },
           data: { approval_rate: rate, influencer_level: level },
         });
+
+        // Award points for accepted submission (per submission, idempotent via referenceId)
+        tryAward(sub.user_id, ACTIVITY_TYPES.PLOT_TWIST_ACCEPTED, {
+          referenceType: "plot_twist_submission_accepted",
+          referenceId: sub.submission_id,
+        });
       }
     }
 
     if (decision !== "reject" && acceptedSubmissionIds.length && creditChapterId) {
+      // Get first accepted submission's content for display in chapter
+      const firstAccepted = event.submissions.find(
+        (s) => acceptedSet.has(s.submission_id)
+      );
       const credit = await tx.plot_twist_chapter_credits.create({
         data: {
           event_id: eventId,
           chapter_id: creditChapterId,
           credit_note: creditNote || null,
+          twist_title: twistTitle || firstAccepted?.twist_title || null,
+          twist_text: twistText || firstAccepted?.twist_description || null,
         },
+      });
+
+      // Award points for author credit decisions
+      // - author gets points once per credit
+      // - each credited submission's author gets points once per credit
+      tryAward(authorId, ACTIVITY_TYPES.PLOT_TWIST_CREDITED, {
+        referenceType: "plot_twist_credit",
+        referenceId: credit.credit_id,
       });
 
       for (const subId of acceptedSubmissionIds) {
         const sub = event.submissions.find((s) => s.submission_id === Number(subId));
         if (!sub) continue;
+
         await tx.plot_twist_credit_contributors.create({
           data: {
             credit_id: credit.credit_id,
@@ -444,8 +473,14 @@ export const resolveAuthorDecision = async (
               `Reader${sub.user_id}`,
           },
         });
+
+        tryAward(sub.user_id, ACTIVITY_TYPES.PLOT_TWIST_CREDITED, {
+          referenceType: "plot_twist_credit_submission",
+          referenceId: sub.submission_id,
+        });
       }
     }
+
   });
 
   return { success: true, decision };
@@ -515,6 +550,8 @@ export const getChapterCredits = async (chapterId) => {
   if (!credit) return null;
   return {
     creditNote: credit.credit_note,
+    twistTitle: credit.twist_title,
+    twistText: credit.twist_text,
     contributors: credit.contributors.map((c) => ({
       handle: c.display_handle,
       userId: c.user_id,

@@ -25,20 +25,9 @@ CREATE INDEX "ai_assistant_history_user_id_idx" ON "ai_assistant_history"("user_
 -- CreateIndex
 CREATE INDEX "ai_assistant_history_created_at_idx" ON "ai_assistant_history"("created_at");
 
--- CreateIndex
-CREATE INDEX "plot_twist_credit_contributors_credit_id_idx" ON "plot_twist_credit_contributors"("credit_id");
-
--- CreateIndex
-CREATE INDEX "plot_twist_votes_submission_id_idx" ON "plot_twist_votes"("submission_id");
-
 -- AddForeignKey
 ALTER TABLE "ai_assistant_history" ADD CONSTRAINT "ai_assistant_history_story_id_fkey" FOREIGN KEY ("story_id") REFERENCES "stories"("story_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ai_assistant_history" ADD CONSTRAINT "ai_assistant_history_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- RenameIndex
-ALTER INDEX "engagement_activity_unique" RENAME TO "engagement_point_logs_user_id_activity_type_reference_type__key";
-
--- RenameIndex
-ALTER INDEX "plot_twist_submissions_event_id_moderation_status_quality_score" RENAME TO "plot_twist_submissions_event_id_moderation_status_quality_s_idx";

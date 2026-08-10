@@ -14,6 +14,7 @@ import {
   getInsightsHandler,
   analyzeStoryHandler,
   getAnalysisHandler,
+  getGeminiRecommendationsHandler,
 } from "../controllers/recommendationController.js";
 
 const router = express.Router();
@@ -24,6 +25,9 @@ router.get("/ai/personalized", protect, getPersonalizedDiscovery);
 
 // Get stories similar to a specific story using embeddings
 router.get("/ai/similar/:storyId", getSimilarStoriesHandler);
+
+// Gemini LLM recommendations (themes, tone, plot — not tag-only matching)
+router.post("/ai/gemini", getGeminiRecommendationsHandler);
 
 // ==================== Interaction Tracking ====================
 // Track various user interactions (skip, like, dislike, etc.)

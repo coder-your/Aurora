@@ -1,0 +1,122 @@
+.page {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.hero {
+  background: #FFFFFF;
+  border: 1px solid #E8E4DE;
+  border-radius: 16px;
+  padding: 2rem;
+  color: #2D2B2A;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #E8E4DE;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #D4A574; /* Warm accent instead of purple */
+}
+
+.progressBar {
+  height: 10px;
+  background: #FFFAF6;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4A574, #E8CCBC);
+  transition: width 0.3s ease;
+}
+
+.auroraCardItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #FFFAF6;
+}
+
+.rarityCommon { color: #6B7280; }
+.rarityRare { color: #D4A574; font-weight: 600; }
+.rarityLegendary { color: #C49164; font-weight: 700; }
+
+.linkRow {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.linkBtn {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: #D4A574;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.linkBtnSecondary {
+  background: #f3f0fa;
+  color: #5b21b6;
+}
+
+.activityList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activityList li {
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.hofGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.contributorRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #faf8ff;
+  border-radius: 10px;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #ede9fe;
+  color: #5b21b6;
+}

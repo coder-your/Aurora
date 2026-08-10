@@ -108,6 +108,8 @@ CREATE TABLE "plot_twist_credit_contributors" (
 );
 
 CREATE UNIQUE INDEX "engagement_activity_unique" ON "engagement_point_logs"("user_id", "activity_type", "reference_type", "reference_id");
+CREATE INDEX "plot_twist_credit_contributors_credit_id_idx" ON "plot_twist_credit_contributors"("credit_id");
+CREATE INDEX "plot_twist_votes_submission_id_idx" ON "plot_twist_votes"("submission_id");
 CREATE INDEX "engagement_point_logs_user_id_created_at_idx" ON "engagement_point_logs"("user_id", "created_at");
 CREATE INDEX "aurora_cards_user_id_status_idx" ON "aurora_cards"("user_id", "status");
 CREATE INDEX "plot_twist_events_story_id_chapter_id_idx" ON "plot_twist_events"("story_id", "chapter_id");

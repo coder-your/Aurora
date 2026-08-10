@@ -255,16 +255,22 @@ export const updateProgress = async (req, res) => {
       },
     });
 
+    // To prevent activity_point_logs uniqueness from blocking repeated earning,
+    // reference the earning window (today) as part of the reference.
+    const today = new Date();
+    const todayRef =
+      today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+
     if (typeof chapterPercent === "number" && chapterPercent >= 90) {
       tryAward(userId, ACTIVITY_TYPES.CHAPTER_READ, {
-        referenceType: "chapter",
-        referenceId: chapter_id,
+        referenceType: "chapter_day",
+        referenceId: chapter_id * 100000 + todayRef,
       });
     }
     if (newProgress >= 100) {
       tryAward(userId, ACTIVITY_TYPES.BOOK_COMPLETE, {
-        referenceType: "story",
-        referenceId: story_id,
+        referenceType: "story_day",
+        referenceId: story_id * 100000 + todayRef,
       });
     }
 

@@ -15,6 +15,7 @@ import readingRoutes from "./routes/reading.routes.js";
 import libraryRoutes from "./routes/library.routes.js";
 import moodboardRoutes from "./routes/moodboard.routes.js";
 import auroraCardsRoutes from "./routes/auroraCards.routes.js";
+import trailerRoutes from "./routes/trailerRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -50,6 +51,7 @@ if (enableCoop) {
 app.use(helmet({
   crossOriginOpenerPolicy: false,
   crossOriginEmbedderPolicy: false,
+   crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
 /* ----------------------------------------------------
@@ -92,6 +94,7 @@ app.use("/api/reading", readingRoutes);
 app.use("/api/library", libraryRoutes);
 app.use("/api/moodboards", moodboardRoutes);
 app.use("/api/aurora-cards", auroraCardsRoutes);
+app.use("/api/trailers", trailerRoutes);
 
 /* ----------------------------------------------------
    Error Handling Middleware

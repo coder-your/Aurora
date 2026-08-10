@@ -1,0 +1,433 @@
+/* --------------------------------------
+   GLOBAL VARIABLES
+-------------------------------------- */
+:root {
+  --navy: #E4DFDB;
+  --navy-light: #dddfe3;
+  --navy-soft: #ffffff;
+
+  --gold: #e8c96e;
+  --gold-light: #fff6d9; 
+
+  --paper: #F8F5F2;
+  --paper-light: #FFFFFF;
+  --paper-dark: #E4DFDB;
+
+  --text-dark: #1A1A1A;
+  --text-light: #021E47;
+  --text-muted: #d3d3da;
+
+  --emerald: #2E7D66;
+  --burgundy: #7B2D2D;
+  --warm-beige: #C9B79C;
+
+  --shadow-soft: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-medium: 0 6px 24px rgba(0,0,0,0.12);
+  --transition: 0.25s ease-in-out;
+  --border-radius: 16px;
+  --gap: 16px;
+}
+
+/* --------------------------------------
+   LAYOUT
+-------------------------------------- */
+.writerDashboard {
+  display: flex;
+  gap: var(--gap);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f5f2 0%, #ffffff 55%, #e4dfdb 100%);
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------
+   SIDEBAR
+-------------------------------------- */
+.chapterSidebar {
+  width: 260px;
+  background: var(--navy);
+  color: var(--text-light);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  box-shadow: var(--shadow-medium);
+}
+
+.chapterList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chapterSidebar h2 {
+  color: var(--text-dark);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.chapterListItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--navy-light);
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.chapterListItem:hover {
+  background: var(--navy-soft);
+  transform: translateX(2px);
+}
+
+.active {
+  border: 2px solid var(--gold);
+  background: var(--navy-soft);
+}
+
+.chapterTitleButton {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.chapterMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chapterMetaText {
+  font-size: 0.8rem;
+  color: rgba(2, 30, 71, 0.7);
+}
+
+.chapterActions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.buttonIconSm {
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.buttonIconSm:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+
+.buttonIconSm:hover:not(:disabled) {
+  background: var(--gold-light);
+}
+
+/* Sidebar buttons inside list items */
+.textRed {
+  color: red;
+}
+
+/* New Chapter Button */
+.buttonPrimary {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 0;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
+  border: none;
+}
+
+.buttonPrimary:hover {
+  background: var(--gold-light);
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------
+   EDITOR
+-------------------------------------- */
+.editorWrapper {
+  flex: 1;
+  background: var(--paper-light);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editorHeaderRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.editorHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editorTitle {
+  flex: 1;
+  min-width: 300px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--navy-soft);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.editorTitle:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(212,175,55,0.35);
+}
+
+.editorContainer {
+  flex: 1;
+  padding: 24px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--navy-light);
+  background: var(--paper-light);
+  transition: var(--transition);
+  min-height: 500px;
+  overflow-y: auto;
+}
+
+.editorContainer:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(212,175,55,0.25);
+}
+
+.editorText {
+  line-height: 1.8rem;
+  font-size: 1.05rem;
+  color: var(--text-dark);
+}
+
+/* --------------------------------------
+   EDITOR TOOLBAR
+-------------------------------------- */
+.editorToolbar {
+  background: var(--navy);
+  padding: 8px 12px;
+  border-radius: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-medium);
+  margin-bottom: 12px;
+  justify-content: flex-end;
+}
+
+.editorToolbar button {
+  background: var(--gold);
+  color: var(--text-dark);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: var(--transition);
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.editorToolbar button:last-child {
+  margin-right: 0;
+}
+
+.editorToolbar button:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------
+   STATS
+-------------------------------------- */
+.statsBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------
+   VERSIONS BOX
+-------------------------------------- */
+.versionsBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: flex-end;
+  max-width: 250px;
+}
+
+.versionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--navy-soft);
+  background: var(--paper-light);
+  transition: var(--transition);
+  font-size: 0.85rem;
+  width: fit-content;
+  max-width: 250px;
+}
+
+.versionItem:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.versionItem button {
+  align-self: flex-end;
+  margin-top: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+/* --------------------------------------
+   INPUTS & SELECTS
+-------------------------------------- */
+.inputSelect {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--navy-light);
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.inputSelect:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 6px rgba(212,175,55,0.3);
+}
+
+/* --------------------------------------
+   MODERN BUTTONS
+-------------------------------------- */
+.button, .buttonSm {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 500;
+  background: var(--gold);
+  color: var(--text-dark);
+  border: none;
+  transition: var(--transition);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(232,201,110,0.35);
+}
+
+.button:hover, .buttonSm:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1024px) {
+  .writerDashboard {
+    flex-direction: column;
+  }
+
+  .chapterSidebar {
+    width: 100%;
+    max-height: 260px;
+    order: 1;
+  }
+
+  .editorWrapper {
+    order: 2;
+  }
+}
+
+/* --------------------------------------
+   DICTIONARY TOOLTIP
+-------------------------------------- */
+.dictionaryTooltip {
+  position: absolute;
+  z-index: 1000;
+  background: var(--gold);
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-medium);
+}
+
+/* --------------------------------------
+   PREVIEW MODAL
+-------------------------------------- */
+.previewBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.previewBox {
+  background: var(--paper-light);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: var(--shadow-medium);
+}
+
+/* --------------------------------------
+   DICTIONARY LOOKUP HIGHLIGHTING
+-------------------------------------- */
+.editorContainer ::selection {
+  background-color: #fef08a;
+  color: #1f2937;
+}
+
+.editorContainer ::-moz-selection {
+  background-color: #fef08a;
+  color: #1f2937;
+}
+
+/* Enhanced highlight for dictionary lookup */
+.editorContainer[data-dictionary-highlight="true"] ::selection {
+  background-color: #fbbf24;
+  color: #1f2937;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}

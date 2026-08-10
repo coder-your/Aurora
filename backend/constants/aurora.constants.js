@@ -13,6 +13,9 @@ export const ENGAGEMENT_POINTS = {
   COMMENT: 3,
   CHAPTER_LIKE: 2,
   STORY_LIKE: 2,
+  PLOT_TWIST_APPROVED: 30,
+  PLOT_TWIST_ACCEPTED: 50,
+  PLOT_TWIST_CREDITED: 100,
 };
 
 export const ACTIVITY_TYPES = {
@@ -28,6 +31,9 @@ export const ACTIVITY_TYPES = {
   COMMENT: "comment",
   CHAPTER_LIKE: "chapter_like",
   STORY_LIKE: "story_like",
+  PLOT_TWIST_APPROVED: "plot_twist_approved",
+  PLOT_TWIST_ACCEPTED: "plot_twist_accepted",
+  PLOT_TWIST_CREDITED: "plot_twist_credited",
 };
 
 export const CARD_RARITY = {

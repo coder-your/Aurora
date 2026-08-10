@@ -1,5 +1,3 @@
-
-
 // export default router;
 import express from "express";
 import * as bookCtrl from "../controllers/bookController.js";
@@ -23,6 +21,7 @@ import * as milestoneCtrl from "../controllers/milestoneController.js";
 import * as discoveryCtrl from "../controllers/discoveryController.js";
 import * as writerProfileCtrl from "../controllers/writerProfileController.js";
 import * as commentIntelCtrl from "../controllers/commentIntelligenceController.js";
+import * as communityCtrl from "../controllers/communityController.js";
 import { protect } from "../middleware/protect.js";
 import { writerOnly } from "../middleware/writerOnly.js";
 import upload from "../utils/multer.js";
@@ -42,6 +41,7 @@ router.post("/books", protect, bookCtrl.createBook);
 
 // Get a book by story_id
 router.get("/books/:story_id", protect, bookCtrl.getBook);
+router.get("/books", protect, bookCtrl.searchBooks);
 
 // Update metadata
 router.patch("/books/:story_id", protect, bookCtrl.updateMetadata);
@@ -163,6 +163,22 @@ router.get("/stories/:storyId/reviews", protect, engageCtrl.listStoryReviews);
 router.post("/stories/:storyId/share", protect, engageCtrl.shareStory);
 router.post("/chapters/:chapterId/share", protect, engageCtrl.shareChapter);
 
+router.get("/community/threads", protect, communityCtrl.listCommunityThreads);
+router.post("/community/threads", protect, communityCtrl.createCommunityThread);
+router.delete("/community/threads/:threadId", protect, communityCtrl.deleteCommunityThread);
+router.post("/community/threads/:threadId/replies", protect, communityCtrl.createCommunityReply);
+router.post("/community/threads/:threadId/vote", protect, communityCtrl.voteCommunityThread);
+router.post("/community/threads/:threadId/save", protect, communityCtrl.saveCommunityThread);
+router.post("/community/replies/:replyId/vote", protect, communityCtrl.voteCommunityReply);
+router.get("/community/explore", protect, communityCtrl.getCommunityExplore);
+router.get("/community/authors", protect, communityCtrl.listCommunityAuthors);
+router.get("/community/authors/:authorId", protect, communityCtrl.getCommunityAuthor);
+router.get("/community/genres/:genre", protect, communityCtrl.getCommunityGenre);
+router.get("/community/books/:storyId", protect, communityCtrl.getCommunityBook);
+router.post("/community/follow", protect, communityCtrl.followCommunityChannel);
+router.post("/community/unfollow", protect, communityCtrl.unfollowCommunityChannel);
+router.get("/community/following", protect, communityCtrl.getMyFollowing);
+
 router.post("/comments/:commentId/report", protect, engageCtrl.reportComment);
 
 router.get("/insights/overview", protect, writerOnly, insightsCtrl.overview);
@@ -211,6 +227,3 @@ router.post("/subscribe-updates", subscribeUpdates);
 router.use("/writing", writingProgressRoutes);
 
 export default router;
-
-
-

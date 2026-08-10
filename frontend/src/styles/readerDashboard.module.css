@@ -177,93 +177,452 @@
   min-height: 100vh;
   padding-bottom: 3rem;
   color: #0f172a;
+  position: relative;
 }
+
+/* Decorative floating lamp for Discover/Home */
+.floatingLampLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes floatLamp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(0.8deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.floatingLamp {
+  animation: floatLamp 5.5s ease-in-out infinite;
+}
+
+
+.floatingLamp {
+  position: absolute;
+  width: 128px;
+  height: auto;
+  opacity: 0.22;
+
+  z-index: 0;
+  transform: translateZ(0);
+
+  pointer-events: none;
+  user-select: none;
+
+  /* darker + warm glow */
+  filter:
+    drop-shadow(0 18px 26px rgba(0, 0, 0, 0.35))
+    drop-shadow(0 0 22px rgba(212, 165, 116, 0.55));
+
+  /* floating animation */
+  animation: floatLamp 5.5s ease-in-out infinite;
+}
+
+
+/* Container wrapper around your search section to anchor the lamp */
+.searchSectionWrapper {
+  position: relative;
+  width: 100%;
+  overflow: visible; /* Crucial so the lamp asset can peek outside boundaries */
+}
+
+/* Floating Lamp Styling */
+.decorativeOilLamp {
+  position: absolute;
+  bottom: -45px;          /* Adjust up or down to position perfectly under the search bar */
+  right: 10%;             /* Places it off-center to the right side */
+  width: 90px;            /* Set scale size */
+  height: auto;
+  z-index: 5;             /* Keeps it perfectly layered */
+  pointer-events: none;   /* Ensures users click straight through to underlying links */
+  opacity: 0.85;          /* Matches a soft, cozy visual texture */
+  filter: drop-shadow(0px 8px 16px rgba(26, 22, 18, 0.06)); /* Soft canvas-matched silhouette shadow */
+}
+
+/* Responsive detail: Hide or scale down on mobile screens to keep the search bar clear */
+@media (max-width: 768px) {
+  .decorativeOilLamp {
+    display: none;
+  }
+}
+.floatingLampLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Crucial: clicks pass right through directly to search bar/inputs */
+  z-index: 0;            /* Keeps assets securely layered behind your text elements */
+  overflow: visible;
+}
+
+/* Base style rules applied to all decorative background assets */
+.floatingLamp {
+  position: absolute;
+  width: 110px;          /* Clean minimalist layout scale width */
+  height: auto;
+  opacity: 0.15;         /* Soft aesthetic whisper look so it doesn't distract the eyes */
+  transition: transform 0.3s ease;
+}
+
+/* 1. Lamp positioned perfectly relative to the search box */
+.floatingLampUnderSearchBy {
+  top: 60px;             /* Pushes it right under your Search Bar line height */
+  right: 12%;            /* Comfortably off-center on the right side */
+  transform: rotate(5deg); /* Slight organic sketch tilt */
+}
+
+/* 2. Lamp positioned relative to your Browse Categories panel */
+.floatingLampUnderDiscover {
+  top: 540px;            /* Shifts down near your wrapped category discovery layout grid */
+  left: 8%;              /* Balances composition by living on the left side margin */
+  width: 95px;           /* Slightly smaller size layout asset */
+  transform: rotate(-8deg);
+}
+
+/* Clean up styling detail: Hide decorative visuals on narrow screens 
+   to keep the focus purely on reading controls and inputs */
+@media (max-width: 768px) {
+  .floatingLampLayer {
+    display: none;
+  }
+}
+
+/* Extra lamp inside the Hero / Inspire Me (Quote) section */
+.floatingQuoteLampLayer {
+  position: absolute;
+  top: 28px;
+  right: 6%;
+  width: 110px;
+  height: 110px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floatingLampUnderQuote {
+  top: 0;
+  left: 0;
+  width: 86px;
+  opacity: 0.79;
+  transform: rotate(-6deg);
+}
+
+.floatingLamp1 {
+  top: 86px;
+  right: 14px;
+}
+
+.floatingLamp2 {
+  top: 330px;
+  left: -18px;
+  width: 96px;
+  opacity: 0.12;
+}
+
+.floatingLamp3 {
+  top: 620px;
+  right: 40px;
+  width: 78px;
+  opacity: 0.10;
+}
+
+.floatingLamp4 {
+  top: 520px;
+  left: 540px; /* kept for backward compatibility; no longer used by ReaderDashboard */
+  width: 70px;
+  opacity: 0.07;
+}
+
+/* Decorative lamp under Search by + Stories (Discover) */
+.floatingLampUnderSearchBy {
+  position: absolute;
+  top: 470px;
+  left: 50%;
+  transform: translateX(70px);
+  width: 86px;
+
+  /* darker + stronger glow that reads like a shadow */
+  opacity: 0.22;
+  z-index: 0;
+
+  /* ensure we can place a ground haze behind the lamp */
+  filter:
+    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.72))
+    drop-shadow(0 0 38px rgba(212, 165, 116, 0.52))
+    drop-shadow(0 0 22px rgba(114, 47, 55, 0.38));
+}
+
+/* Ambient “ground” glow under the lamp (radial haze) */
+.floatingLampUnderSearchBy::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  /* place haze slightly below the image to look like a shadow */
+  top: 58%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 120px;
+
+  background: radial-gradient(
+    closest-side,
+    rgba(212, 165, 116, 0.34) 0%,
+    rgba(212, 165, 116, 0.2) 25%,
+    rgba(114, 47, 55, 0.13) 55%,
+    rgba(0, 0, 0, 0) 72%
+  );
+
+  /* Push haze behind the actual lamp image */
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
+  filter: blur(6px);
+}
+
+@media (max-width: 900px) {
+  .floatingLampUnderSearchBy {
+    top: 510px;
+    transform: translateX(40px);
+    width: 74px;
+    opacity: 0.2;
+  }
+
+  .floatingLampUnderSearchBy::after {
+    width: 210px;
+    height: 105px;
+  }
+}
+
+/* Backward compatibility removed: keep old discover lamp class unused */
+.floatingLampUnderDiscover {
+  /* keep compatibility in case some part of UI uses this old class */
+  position: absolute;
+  top: 470px;
+  left: 50%;
+  transform: translateX(70px);
+  width: 86px;
+  opacity: 0.22;
+  z-index: 0;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.72))
+    drop-shadow(0 0 38px rgba(212, 165, 116, 0.52))
+    drop-shadow(0 0 22px rgba(114, 47, 55, 0.38));
+}
+
+.floatingLampUnderDiscover::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 120px;
+  background: radial-gradient(
+    closest-side,
+    rgba(212, 165, 116, 0.34) 0%,
+    rgba(212, 165, 116, 0.2) 25%,
+    rgba(114, 47, 55, 0.13) 55%,
+    rgba(0, 0, 0, 0) 72%
+  );
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
+  filter: blur(6px);
+}
+
+
+
+
+
+
+
+@media (max-width: 768px) {
+  .floatingLamp1 {
+    top: 110px;
+    right: -6px;
+    width: 92px;
+  }
+
+  .floatingLamp2 {
+    top: 280px;
+    left: -24px;
+  }
+
+  .floatingLamp3 {
+    display: none;
+  }
+
+  .floatingLamp4 {
+    display: none;
+  }
+}
+
+
 
 /* ============================================
    HERO / QUOTE SECTION
    ============================================ */
-.heroSection {
-  background: linear-gradient(135deg, rgba(8, 21, 45, 0.8), rgba(33, 19, 8, 0.85)),
-    url("../assets/backgrounds/inspiration.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+ .heroSection {
+  /* warm “paper on desk” canvas */
+  background: #F7F1E6;
   border-radius: 28px;
   margin: 1.5rem auto 0;
   max-width: 1180px;
-  padding: 2.4rem clamp(1.5rem, 4vw, 3rem);
-  text-align: center;
+  padding: 1.9rem 2.6rem;
+
   position: relative;
   overflow: hidden;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(114, 47, 55, 0.08);
 }
 
 .heroSection::before {
   content: "";
   position: absolute;
-  inset: 18px;
-  border: 1px solid rgba(248, 237, 216, 0.25);
+  inset: 16px;
+  border: 1px solid rgba(114, 47, 55, 0.08);
   border-radius: 20px;
   pointer-events: none;
 }
 
-.quoteContainer {
+.heroInner {
   position: relative;
   z-index: 1;
-  max-width: 540px;
-  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
 }
 
+@media (min-width: 980px) {
+  .heroInner {
+    grid-template-columns: 0.62fr 0.38fr; /* 60/40 asymmetric */
+    gap: 1.5rem;
+    align-items: center;
+  }
+}
+
+.quoteWrap {
+  display: flex;
+}
+
+.quoteCard {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 1px solid rgba(114, 47, 55, 0.14); /* 1px muted clay */
+  padding: 1.35rem 1.45rem;
+  box-shadow: none; /* no blurry glow */
+}
+
+.heroAside {
+  display: flex;
+}
+
+.asideCard {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 20px;
+  border: 1px solid rgba(114, 47, 55, 0.12);
+  padding: 1.35rem 1.45rem;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.asideLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.45em;
+  color: rgba(139, 127, 119, 0.85);
+  font-weight: 700;
+}
+
+.asideTitle {
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  color: #2D2B2A;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+
 .quoteIcon {
-  font-size: 2.4rem;
-  color: #e8c96e;
+  font-size: 2.1rem;
+  color: rgba(114, 47, 55, 0.65);
   margin-bottom: 0.75rem;
-  opacity: 0.8;
+  line-height: 1;
 }
 
 .quoteText {
   font-family: "Playfair Display", serif;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 500;
-  color: #fff7eb;
-  line-height: 1.8;
-  margin-bottom: 1rem;
+  color: #2D2B2A;
+  line-height: 1.75;
+  margin-bottom: 0.75rem;
   font-style: italic;
-  text-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  text-shadow: none;
 }
 
 .quoteAuthor {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 1.1rem;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  font-size: 0.88rem;
+  color: rgba(45, 43, 42, 0.72);
+  margin-bottom: 0;
+  text-shadow: none;
+  letter-spacing: 0.01em;
 }
 
 .inspireBtn {
+  width: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1.2rem;
-  background: #e8c96e;
-  color: rgb(2, 30, 71);
-  border: none;
-  border-radius: 25px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: rgba(232, 201, 110, 0.22); /* muted terracotta/sand */
+  color: #4c2a1f;
+  border: 1px solid rgba(114, 47, 55, 0.14);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  box-shadow: none;
 }
 
 .inspireBtn:hover {
-  background: #fff6d9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(232, 201, 110, 0.4);
+  background: rgba(232, 201, 110, 0.32);
+  transform: translateY(-1px);
+  border-color: rgba(114, 47, 55, 0.2);
 }
 
 .inspireBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
 }
+
+.inspireIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inspireArrow {
+  font-weight: 900;
+  opacity: 0.75;
+}
+
 
 /* ============================================
    MAIN CONTENT
@@ -359,10 +718,11 @@
 /* ============================================
    CATEGORY / TAG PILLS
    ============================================ */
-.pillsSection {
+  .pillsSection {
   margin-top: 0.75rem;
   margin-bottom: 2rem;
 }
+
 
 .pillsTitle {
   font-size: 0.85rem;
@@ -403,6 +763,108 @@
   color: rgb(2, 30, 71);
 }
 
+/* ============================================
+   DISCOVERY UI (Categories as icon cards)
+   ============================================ */
+.discoveryWrap {
+  background: rgba(2, 30, 71, 0.04);
+  border: 1px solid rgba(2, 30, 71, 0.07);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.04);
+  margin: 0 auto 1.75rem;
+}
+
+.discoveryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .discoveryGrid {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+
+.discoveryBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.discoveryTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(159, 141, 116, 0.95);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.discoverySubtitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  color: #201a13;
+}
+
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .iconGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.iconCard {
+  border: none; /* remove outline */
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease;
+}
+
+.iconCard:hover {
+  transform: translateY(-2px);
+}
+
+.iconCardArt {
+  width: 84px;
+  height: 84px;
+  border-radius: 20px; /* squircle rounding */
+  background: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+  border: 0;
+}
+
+.iconCardArt svg {
+  width: 44px;
+  height: 44px;
+}
+
+.iconCardLabel {
+  font-size: 0.78rem;
+  color: rgba(2, 30, 71, 0.65);
+  font-weight: 700;
+}
+
+.iconCardActive .iconCardArt {
+  background: rgba(232, 201, 110, 0.35);
+}
+
+/* ============================================ */
 .pillTag {
   background: rgba(2, 30, 71, 0.08);
   color: rgb(2, 30, 71);
@@ -413,6 +875,13 @@
   background: rgb(2, 30, 71);
   color: #ffffff;
 }
+
+/* Active pill used by discovery tags in ReaderDashboard */
+.pillActive {
+  background: rgb(2, 30, 71);
+  color: #ffffff;
+}
+
 
 /* ============================================
    FEED SECTIONS
@@ -540,30 +1009,38 @@
 .bookCard {
   background: #ffffff;
   border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 35px rgba(26, 22, 18, 0.12);
-  border: 1px solid rgba(139, 127, 119, 0.15);
+  overflow: hidden; /* ensures cover + children clip to rounded corners */
+
+  /* subtle neutral border + softer floating shadow */
+  border: 1px solid rgba(139, 127, 119, 0.11);
+  box-shadow: 0 14px 40px rgba(26, 22, 18, 0.08);
+
   transition: all 0.25s ease;
   cursor: pointer;
   position: relative;
 }
 
+
 .bookCard:hover {
   transform: translateY(-4px);
   box-shadow:
-    0 15px 30px rgba(26, 22, 18, 0.18),
-    0 0 18px rgba(201, 169, 97, 0.35);
+    0 18px 45px rgba(26, 22, 18, 0.14),
+    0 0 18px rgba(201, 169, 97, 0.22);
 }
+
 
 .bookCover {
   position: relative;
   width: 100%;
   padding-bottom: 140%;
   background: linear-gradient(135deg, #f8f6f0 0%, #8b7f77 100%);
-  overflow: hidden;
-  border: 2px solid rgba(201, 169, 97, 0.2);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* clipping to rounded card */
+
+  /* remove the “framed” feeling; keep only a subtle edge */
+  border: 1px solid rgba(201, 169, 97, 0.14);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
 }
+
 
 .bookCoverImage {
   position: absolute;
@@ -666,11 +1143,28 @@
   gap: 0.25rem;
 }
 
+/* Remove default button feel (author is clickable but should look like muted text) */
+.authorLink {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.authorLink:hover {
+  text-decoration: underline;
+}
+
 .bookAuthor span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 
 /* Category/Tag Badge Below Book */
 .bookBadges {
@@ -698,10 +1192,15 @@
 }
 
 .bookBadgeTag {
-  background: rgba(2, 30, 71, 0.08);
-  color: rgb(2, 30, 71);
-  border: 1px solid rgba(2, 30, 71, 0.2);
+  /* higher-end neutral pill */
+  background: rgba(2, 30, 71, 0.06);
+  color: rgba(2, 30, 71, 0.88);
+  border: 1px solid rgba(2, 30, 71, 0.14);
+
+  /* slightly more deliberate spacing */
+  padding: 0.35rem 0.7rem;
 }
+
 
 .bookBadgeMood {
   background: rgba(147, 197, 253, 0.25);

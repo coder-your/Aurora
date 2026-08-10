@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma migrate dev --name add_twist_title_text --skip-seed)",
+      "Bash(psql \"$DATABASE_URL\" -c \"ALTER TABLE plot_twist_chapter_credits ADD COLUMN twist_title VARCHAR\\(200\\); ALTER TABLE plot_twist_chapter_credits ADD COLUMN twist_text TEXT;\")",
+      "Bash(taskkill //F //IM node.exe)"
+    ]
+  }
+}

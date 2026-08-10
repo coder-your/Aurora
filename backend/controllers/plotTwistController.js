@@ -117,13 +117,15 @@ export const postVote = async (req, res) => {
 export const postDecision = async (req, res) => {
   try {
     const eventId = Number(req.params.eventId);
-    const { decision, acceptedSubmissionIds, creditChapterId, creditNote } = req.body;
+    const { decision, acceptedSubmissionIds, creditChapterId, creditNote, twistTitle, twistText } = req.body;
 
     const result = await resolveAuthorDecision(req.user.user_id, eventId, {
       decision,
       acceptedSubmissionIds: acceptedSubmissionIds || [],
       creditChapterId: creditChapterId ? Number(creditChapterId) : null,
       creditNote,
+      twistTitle,
+      twistText,
     });
 
     return res.json(result);

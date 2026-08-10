@@ -2,6 +2,7 @@ import prisma from "../utils/prisma.js";
 import { sanitizeInput } from "../utils/sanitize.js";
 import { analyzeToxicity } from "../utils/toxicity.js";
 import { tryAward, ACTIVITY_TYPES } from "../utils/auroraHooks.js";
+import { inferReviewStarRating } from "../services/reviewRating.service.js";
 
 const REPORT_HIDE_THRESHOLD = 5;
 
@@ -1047,13 +1048,9 @@ export const upsertStoryReview = async (req, res) => {
     const { story, error } = await ensurePublishedStoryById(storyId);
     if (error) return res.status(error.status).json({ message: error.message });
 
-    const rating = Number(req.body?.rating);
-    if (!rating || Number.isNaN(rating) || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "rating must be between 1 and 5" });
-    }
-
     const review_text_raw = (req.body?.review_text || "").toString();
     const review_text = review_text_raw ? sanitizeInput(review_text_raw) : null;
+    const inferredRating = await inferReviewStarRating(review_text || "");
 
     const hadReview = await prisma.story_reviews.findUnique({
       where: { story_id_user_id: { story_id: storyId, user_id: user.user_id } },
@@ -1061,8 +1058,8 @@ export const upsertStoryReview = async (req, res) => {
 
     const saved = await prisma.story_reviews.upsert({
       where: { story_id_user_id: { story_id: storyId, user_id: user.user_id } },
-      update: { rating, review_text, updated_at: new Date() },
-      create: { story_id: storyId, user_id: user.user_id, rating, review_text },
+      update: { rating: inferredRating, review_text, updated_at: new Date() },
+      create: { story_id: storyId, user_id: user.user_id, rating: inferredRating, review_text },
     });
 
     if (story?.author_id && story.author_id !== user.user_id) {
@@ -1077,7 +1074,7 @@ export const upsertStoryReview = async (req, res) => {
             storyId,
             storyTitle: story.title,
             reviewId: saved.id,
-            rating,
+            rating: inferredRating,
             preview: review_text?.slice(0, 160) || null,
           }),
         },

@@ -61,6 +61,47 @@ export const getBook = async (req, res) => {
   }
 };
 
+export const searchBooks = async (req, res) => {
+  try {
+    const query = String(req.query.q || "").trim();
+    const where = {
+      is_deleted: false,
+      visibility: { in: ["public", "published"] },
+      OR: query
+        ? [
+            { title: { contains: query, mode: "insensitive" } },
+            { description: { contains: query, mode: "insensitive" } },
+            { category: { contains: query, mode: "insensitive" } },
+          ]
+        : undefined,
+    };
+
+    const stories = await prisma.stories.findMany({
+      where,
+      select: {
+        story_id: true,
+        title: true,
+        description: true,
+        category: true,
+        cover_url: true,
+        author: {
+          select: {
+            first_name: true,
+            last_name: true,
+          },
+        },
+      },
+      orderBy: { last_updated: "desc" },
+      take: 8,
+    });
+
+    return res.json({ stories });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 // Publish workflow
 export const publishBook = async (req, res) => {
   try {

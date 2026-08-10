@@ -1,0 +1,417 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f5f2 0%, #ffffff 55%, #e4dfdb 100%);
+  font-family: "Inter", sans-serif;
+}
+
+.sidebar {
+  width: 220px;
+  padding: 20px 18px;
+  border-right: 1px solid #e4dfdb;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.sidebarTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #021e47;
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.navItem {
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  transition: 0.2s ease-in-out;
+}
+
+.navItem span.icon {
+  font-size: 0.95rem;
+}
+
+.navItem:hover {
+  background-color: #f3f4f6;
+  transform: translateX(2px);
+}
+
+.navItemActive {
+  background-color: #e8c96e;
+  color: #1a1a1a;
+}
+
+.content {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.storyTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: "Playfair Display", "Georgia", serif;
+  color: #021e47;
+}
+
+.storySubtitle {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.paletteRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.banner {
+  margin-top: 16px;
+  border-radius: 20px;
+  height: 180px;
+  background: linear-gradient(120deg, #1f2933, #4b5563);
+  position: relative;
+  overflow: hidden;
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(232, 201, 110, 0.38), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(46, 125, 102, 0.3), transparent 55%);
+}
+
+.bannerText {
+  position: relative;
+  z-index: 1;
+  padding: 20px 22px;
+  color: #f9fafb;
+}
+
+.bannerTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 28px;
+}
+
+.sectionCard {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.sectionSubtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.sectionBody {
+  margin-top: 8px;
+}
+
+.vibeGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.vibeImages {
+  column-count: 3;
+  column-gap: 12px;
+  min-height: 20px;
+}
+
+.vibeImageCard {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  background-color: #f3f4f6;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.vibeImageCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.vibeImageCard img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+}
+
+.vibeWords {
+  padding: 10px 12px;
+  background-color: #f8f5f2;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.tagPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background-color: #e8c96e33;
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+
+.charactersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.characterCard {
+  background-color: #f8f5f2;
+  border-radius: 16px;
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.characterHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background-color: #e4dfdb;
+  object-fit: cover;
+}
+
+.characterName {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.characterMeta {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.sliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sliderLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.sliderTrack {
+  height: 4px;
+  border-radius: 999px;
+  background-color: #e4dfdb;
+  overflow: hidden;
+}
+
+.sliderFill {
+  height: 100%;
+  background: linear-gradient(90deg, #a7f3d0, #facc15);
+}
+
+.plotGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.notesBoard {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.noteCard {
+  border-radius: 12px;
+  padding: 8px 10px;
+  background-color: #fef9c3;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.timelineStrip {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.timelineDot {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background-color: #e4dfdb;
+  font-size: 0.75rem;
+}
+
+.locationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.locationCard {
+  border-radius: 14px;
+  background-color: #f8f5f2;
+  padding: 10px 10px 12px;
+}
+
+.locationImage {
+  width: 100%;
+  height: 100px;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: #e4dfdb;
+}
+
+.locationTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.locationText {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.metaList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.metaItemTitle {
+  font-weight: 600;
+}
+
+.quotesStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quoteBubble {
+  max-width: 260px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background-color: #eff6ff;
+  font-size: 0.8rem;
+}
+
+.inspirationGrid {
+  column-count: 4;
+  column-gap: 12px;
+}
+
+.inspirationCard {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.inspirationCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.inspirationCard img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.soundtrackStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.trackCard {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background-color: #e5e7eb;
+  font-size: 0.8rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: #e4dfdb;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+.smallMuted {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}

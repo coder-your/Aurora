@@ -31,18 +31,12 @@ export const getWriterDashboard = async (req, res) => {
 
     const books = await prisma.stories.findMany({
       where: { author_id: user.user_id, is_deleted: false },
-      select: {
-        story_id: true,
-        title: true,
-        description: true,
-        category: true,
-        tags: true,
-        status: true,
-        visibility: true,
-        total_words: true,
-        last_updated: true,
-        cover_url: true,
-        created_at: true,
+      include: {
+        chapters: {
+          where: { is_deleted: false },
+          orderBy: { order_index: "asc" },
+          select: { chapter_id: true, order_index: true, title: true }
+        }
       }
     });
 
